@@ -1,0 +1,81 @@
+{
+  "name": "xcloud-nexus",
+  "productName": "Xbox Cloud Nexus",
+  "version": "1.0.0",
+  "description": "A premium Windows desktop client for Xbox Cloud Gaming with integrated Better xCloud enhancements and full keyboard/mouse + controller customization.",
+  "main": "src/main/main.cjs",
+  "author": "Xbox Cloud Nexus Contributors",
+  "license": "MIT",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://example.com/xcloud-nexus"
+  },
+  "build": {
+    "appId": "com.xcloudnexus.app",
+    "productName": "Xbox Cloud Nexus",
+    "copyright": "Copyright © 2026 Xbox Cloud Nexus contributors",
+    "artifactName": "XboxCloudNexus-${version}-${arch}.${ext}",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "src/**/*",
+      "vendor/**/*",
+      "build/icon.ico",
+      "build/icon-*.png",
+      "package.json",
+      "!**/*.map",
+      "!**/*.md"
+    ],
+    "asar": true,
+    "win": {
+      "target": [
+        { "target": "nsis", "arch": ["x64"] },
+        { "target": "portable", "arch": ["x64"] }
+      ],
+      "icon": "build/icon.ico",
+      "artifactName": "XboxCloudNexus-${version}-${arch}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Xbox Cloud Nexus",
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico",
+      "installerHeaderIcon": "build/icon.ico",
+      "deleteAppDataOnUninstall": false,
+      "artifactName": "XboxCloudNexus-${version}-setup.${ext}"
+    },
+    "portable": {
+      "artifactName": "XboxCloudNexus-${version}-portable.${ext}"
+    }
+  },
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev",
+    "smoke": "electron . --smoke",
+    "uitest": "electron src/main/uitest.cjs",
+    "verify:bridge": "node scripts/check-stream-bridge.cjs",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "icons": "node scripts/generate-icons.mjs",
+    "dist": "npm run icons && electron-builder --win nsis portable",
+    "dist:installer": "npm run icons && electron-builder --win nsis",
+    "dist:portable": "npm run icons && electron-builder --win portable",
+    "typecheck": "node --check src/main/main.cjs"
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.1.8",
+    "vitest": "^2.1.1"
+  },
+  "allowScripts": {
+    "electron@33.4.11": true,
+    "esbuild@0.21.5": true
+  }
+}

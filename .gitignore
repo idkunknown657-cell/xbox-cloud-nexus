@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+*.exe
+*.msi
+
+# Local app data / logs
+*.log
+logs/
+.settings.json
+settings.json
+
+# Editor / OS noise
+.vscode/
+.idea/
+Thumbs.db
+Desktop.ini
+*.swp
+
+# Test scratch
+/tmp/
+*.tmp.css
+# Local tooling metadata
+.freebuff/

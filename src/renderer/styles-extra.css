@@ -1,0 +1,99 @@
+/* ============================================================
+   Xbox Cloud Nexus — component styles (part 2)
+   Loaded after styles.css. Adds the components the views need:
+   tabs, swatches, remap layout, details overlay, wizard extras.
+   ============================================================ */
+
+/* ---------- Titlebar extras ---------- */
+.titlebar .tb-brand.right { gap: 12px; padding-right: 8px; }
+.titlebar .tb-brand .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-3); display: inline-block; }
+.titlebar .tb-net.ok .dot { background: var(--accent); box-shadow: 0 0 8px var(--accent-dim); }
+.titlebar .tb-net.err .dot { background: #e5484d; }
+.titlebar .tb-pad { display: inline-flex; align-items: center; color: var(--text-3); transition: color var(--dur-1) var(--ease); }
+.titlebar .tb-pad.active { color: var(--accent); }
+
+/* ---------- Tabs ---------- */
+.tabbar { display: flex; gap: 4px; border-bottom: 1px solid var(--line); margin-bottom: 18px; flex-wrap: wrap; }
+.tabbar .tab {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 10px 16px; font-size: 13.5px; font-weight: 600; color: var(--text-3);
+  border-bottom: 2px solid transparent; transition: color var(--dur-1) var(--ease), border-color var(--dur-1) var(--ease);
+  margin-bottom: -1px;
+}
+.tabbar .tab:hover { color: var(--text-2); }
+.tabbar .tab.on { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* ---------- Colour swatches & pickers ---------- */
+.swatch { width: 26px; height: 26px; border-radius: 50%; border: 2px solid transparent; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.3); transition: transform var(--dur-1) var(--ease); }
+.swatch:hover { transform: scale(1.12); }
+.swatch.on { border-color: var(--text); box-shadow: 0 0 0 3px var(--accent-soft); }
+.color-input { width: 40px; height: 28px; border: 1px solid var(--line-strong); border-radius: 8px; background: var(--surface-2); padding: 2px; cursor: pointer; }
+.color-input::-webkit-color-swatch-wrapper { padding: 0; }
+.color-input::-webkit-color-swatch { border: none; border-radius: 5px; }
+
+/* ---------- Settings search results ---------- */
+.settings-results { background: var(--surface-1); border: 1px solid var(--line-strong); border-radius: var(--radius); margin-bottom: 18px; padding: 8px; max-height: 320px; overflow-y: auto; }
+.settings-results .p-item { padding: 8px 10px; }
+.flash { animation: flash-hi 900ms var(--ease); }
+@keyframes flash-hi { 0% { box-shadow: 0 0 0 0 var(--accent-soft); } 30% { box-shadow: 0 0 0 6px var(--accent-soft); } 100% { box-shadow: 0 0 0 0 transparent; } }
+.mb16 { margin-bottom: 16px; }
+
+/* ---------- Remap layout ---------- */
+.remap-layout { display: grid; grid-template-columns: minmax(320px, 1.1fr) 1fr; gap: 22px; align-items: start; }
+@media (max-width: 980px) { .remap-layout { grid-template-columns: 1fr; } }
+.remap-visual .controller-visual { margin: 12px auto 6px; }
+.remap-hint { font-size: 12.5px; display: flex; align-items: center; gap: 7px; justify-content: center; text-align: center; }
+.remap-hint .lit { color: var(--accent); font-weight: 600; display: inline-flex; align-items: center; gap: 7px; }
+.cv-stick { display: grid; place-items: center; gap: 0; }
+.cv-hit .k { display: block; max-width: 100%; }
+
+/* ---------- Test mode ---------- */
+.test-status { margin-top: 12px; font-size: 12.5px; }
+.testpad { grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); }
+
+/* ---------- Details overlay ---------- */
+.overlay-veil { position: fixed; inset: 0; z-index: 330; background: rgba(4, 6, 5, 0.62); overflow-y: auto; padding: 40px 20px; display: grid; place-items: start center; animation: fade var(--dur-2) var(--ease); }
+body.perf-noanim .overlay-veil { animation: none; }
+.overlay-card { width: min(1180px, 96vw); background: var(--surface-0); border: 1px solid var(--line-strong); border-radius: var(--radius-lg); padding: 22px; box-shadow: var(--shadow-2); animation: pop calc(220ms * var(--speed)) var(--ease); }
+body.perf-noanim .overlay-card { animation: none; }
+.details-loading { padding: 40px; }
+.dh-poster-fallback { aspect-ratio: 3/4; display: grid; place-items: center; background: linear-gradient(160deg, var(--surface-2), var(--surface-3)); color: var(--text-3); font-weight: 800; font-size: 30px; }
+.dh-logo { max-height: 46px; max-width: 260px; object-fit: contain; margin-bottom: 10px; filter: drop-shadow(0 2px 8px rgba(0,0,0,0.5)); }
+.btn.is-fav { color: var(--accent); border-color: var(--accent-dim); }
+.shot-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+.shot-grid .shot { width: 100%; aspect-ratio: 16/9; object-fit: cover; border-radius: 10px; border: 1px solid var(--line); background: var(--surface-2); }
+
+/* ---------- Per-game assignment ---------- */
+.pergame-list { max-height: 420px; overflow-y: auto; padding-right: 4px; }
+.assign-thumb-fallback { width: 34px; height: 44px; border-radius: 6px; display: grid; place-items: center; background: var(--surface-3); color: var(--text-3); font-weight: 800; }
+
+/* ---------- Wizard extras ---------- */
+.bullets { display: grid; gap: 10px; }
+.bullet { display: flex; align-items: center; gap: 11px; padding: 12px 14px; border-radius: 11px; background: var(--surface-2); border: 1px solid var(--line); font-size: 14px; font-weight: 600; }
+.bullet svg { color: var(--accent); }
+.wizard-controller-status { margin: 6px 0 4px; }
+.wizard-done-icon { display: grid; place-items: center; height: 120px; color: var(--accent); }
+.wizard-done-icon svg { filter: drop-shadow(0 6px 18px var(--accent-soft)); }
+.preset-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+@media (max-width: 620px) { .preset-cards { grid-template-columns: 1fr; } }
+.preset-card { text-align: left; padding: 18px; border-radius: var(--radius); border: 1px solid var(--line-strong); background: var(--surface-2); transition: all var(--dur-1) var(--ease); }
+.preset-card:hover { border-color: var(--accent-dim); transform: translateY(-2px); }
+.preset-card.on { border-color: var(--accent); background: var(--accent-soft); }
+.preset-name { font-weight: 700; font-size: 15px; margin-bottom: 4px; }
+.preset-desc { font-size: 12.5px; color: var(--text-3); }
+.attrib svg { vertical-align: -3px; margin-right: 4px; }
+
+/* ---------- Log viewer ---------- */
+.log-view { max-height: 52vh; overflow: auto; background: var(--surface-0); border: 1px solid var(--line); border-radius: 10px; padding: 14px; font-family: var(--font-mono); font-size: 12px; line-height: 1.6; color: var(--text-2); user-select: text; white-space: pre-wrap; word-break: break-word; }
+
+/* ---------- Recovery banner ---------- */
+.recovery-banner { display: flex; gap: 14px; align-items: center; margin: 16px 30px 0; padding: 14px 18px; border-radius: var(--radius); border: 1px solid rgba(248, 200, 64, 0.4); background: rgba(248, 200, 64, 0.08); }
+.recovery-banner svg { color: #f8c840; flex: 0 0 auto; }
+.recovery-banner .r-title { font-weight: 700; font-size: 14px; }
+.recovery-banner .r-desc { color: var(--text-2); font-size: 12.5px; margin-top: 2px; }
+
+/* ---------- Offline / low-end tweaks ---------- */
+body.perf-nofx .hero-bg { transform: none !important; }
+body.perf-noshadow .card:hover { box-shadow: none; }
+body.perf-noanim .card:hover { transform: none; }
+@media (max-width: 1100px) { .page { padding: 16px 20px 60px; } }
