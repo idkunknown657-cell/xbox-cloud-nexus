@@ -251,7 +251,9 @@ Node 20+ and Windows are expected for packaging.
 npm run verify            # both offline suites below
 npm run verify:bridge     # 57 assertions on the profile -> Better xCloud preset converter
 npm run verify:entitlements  # 29 assertions on the account/access rules (real payload fixtures)
-npm run uitest            # boots the real UI, tours every screen, 193 DOM assertions
+npm run verify:auth        # 27 assertions on account identification and session states
+npm run windowtest         # launches a game window against a local stub and asserts it is really shown
+npm run uitest            # boots the real UI, tours every screen, 200 DOM assertions
 npm run smoke             # launches the app, verifies catalogue, store and preset plumbing
 npm run screenshots       # regenerates docs/screenshots/ from the shipping UI
 ```
@@ -262,6 +264,10 @@ gateway, account entitlements and badges, the ads flow, settings and the command
 The entitlement suite runs against real Microsoft payloads captured by
 `node scripts/capture-entitlements.cjs`, so the access rules are proven against the same
 data the app reads in production.
+
+`npm run windowtest` drives the real `launchGame()` against a local stub page and asserts
+the game window is actually on screen the moment the launcher reports “launched” — the
+check that catches a silent launch, where the window is created but never shown.
 
 ---
 
@@ -282,6 +288,11 @@ data the app reads in production.
 
 - [Better xCloud](https://github.com/redphx/better-xcloud) by **redphx** — the
   mouse/keyboard-to-controller emulation and stream enhancements this app builds on (MIT).
+- [XFly](https://github.com/m669st/XFly) — the account-identification approach used here
+  (reading the official `xboxcom_xbl_user_info` session record and the `XBXXtk` session
+  cookie, and driving Microsoft's own sign-in control) was adapted from XFly's MIT-licensed
+  implementation. Our code, architecture and error handling are our own; no XFly code was
+  copied verbatim.
 - Xbox Cloud Gaming catalogue and artwork belong to Microsoft; this project is
   unaffiliated with Microsoft.
 
