@@ -239,6 +239,13 @@ function wireEvents() {
       markStreamClosed(payload.productId);
       toastErr(new Error(payload.reason || 'not launchable'), 'Could not start this game');
       if (payload.reason) toastInfo(payload.reason);
+      // A refused launch because the session is gone is the one failure the
+      // player can actually fix, so offer it rather than leaving them to guess.
+      if (payload.signedOut) {
+        settings.set('account.signedIn', false).catch(() => {});
+        paintSidebar();
+        toastInfo('Your Xbox session ended. Open Settings → Account and sign in again.');
+      }
     } else if (payload.state === 'error') {
       // The window opened but the page did not: never leave it looking launched.
       toastErr(new Error(payload.reason || 'page failed'), t('stream_crashed'));

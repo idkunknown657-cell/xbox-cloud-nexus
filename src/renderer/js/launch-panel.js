@@ -190,7 +190,10 @@ export async function openLaunchPanel(game, ctx) {
   paintControls();
 
   const choice = await openModal({
-    title: t('launching'),
+    // Not "Launching…": nothing has launched yet. The panel is a confirmation,
+    // and the title claimed otherwise, so a player who opened it to change a
+    // setting saw a progress state that never progressed.
+    title: game.title ? 'Ready — ' + game.title : t('play_now'),
     body,
     dismissable: true,
     width: 620,

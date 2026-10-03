@@ -84,6 +84,37 @@ class WindowManager {
   }
 
   /**
+   * Drop the cached account because the real session is gone.
+   *
+   * Kept separate from clearSession(): nothing here touches cookies. The point
+   * is to stop the launcher reporting an account that cannot play, so the next
+   * action the player takes is signing in again rather than pressing Play.
+   */
+  markSessionRevoked() {
+    this.store.set('account.signedIn', false);
+    this.store.set('account.gamertag', '');
+    this.store.set('account.xuid', '');
+    this.store.set('account.avatarUrl', '');
+    this.store.set('account.sessionState', 'expired');
+    this.store.set('account.skippedSignIn', false);
+    this.sendToRenderer('auth:changed', {
+      signedIn: false, gamertag: '', plan: 'auto', planSource: 'signedOut', sessionState: 'expired',
+    });
+    // Drop the rejected cookie. Clearing the stored flags alone was not enough:
+    // every status read re-derived "signed in" from this cookie, because it
+    // still parsed and its own expiry had not passed. Xbox has already told us
+    // it is worthless, so the launcher must stop believing it.
+    const ses = session.fromPartition('persist:stream');
+    ses.cookies.get({}).then((cookies) => {
+      const dead = cookies.filter((c) => String(c.name || '').startsWith('XBXXtk'));
+      if (!dead.length) return;
+      return Promise.all(dead.map((c) => ses.cookies.remove(
+        c.url || `https://www.xbox.com/`, c.name,
+      ))).then(() => this.log.info('auth', `session revoked by xbox: dropped ${dead.length} stale token cookie(s)`));
+    }).catch((err) => this.log.warn('auth', 'could not drop the stale token cookie:', err.message));
+  }
+
+  /**
    * Open the *official* Xbox Cloud Gaming page for signing in.
    *
    * We deliberately do not build our own credential form: the user signs in on
@@ -494,7 +525,12 @@ class WindowManager {
         }
         if (state !== 'denied') return;
         this.log.warn('stream', `launch refused for ${pid}:`, String(reason).slice(0, 160));
-        this.sendToRenderer('stream:status', { productId: pid, state: 'denied', reason: String(reason || '') });
+        // Xbox rejecting the session is the authority on it. The stored
+        // `XBXXtk` cookie can still parse and still look unexpired after the
+        // session behind it is revoked, so the launcher would keep reporting
+        // "signed in" while nothing can stream. Trust the page, not the cookie.
+        if (/signed out/i.test(String(reason || ''))) this.markSessionRevoked();
+        this.sendToRenderer('stream:status', { productId: pid, state: 'denied', reason: String(reason || ''), signedOut: /signed out/i.test(String(reason || '')) });
         // The page clears itself by going back to the catalogue, which reloads
         // it and would re-run the whole launch — an endless cycle of failed
         // launches and repeated notifications. Close it instead: the launcher

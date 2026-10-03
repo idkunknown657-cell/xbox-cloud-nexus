@@ -477,15 +477,49 @@ body.perf-noanim .toast { animation: none; }
 .toast .t-msg { color: var(--text-2); font-size: 12.5px; margin-top: 2px; line-height: 1.4; }
 
 /* ---------- Modals ---------- */
-.modal-veil { position: fixed; inset: 0; z-index: 350; background: rgba(4, 6, 5, 0.6); display: grid; place-items: center; animation: fade var(--dur-2) var(--ease); }
+/*
+ * The veil scrolls, and the dialog is a column of title / scrolling body /
+ * action bar.
+ *
+ * It used to be `display: grid; place-items: center` with no overflow, so a
+ * dialog taller than the window — the launch panel is ~900px of profile, input
+ * and display controls — had its top and bottom clipped with no way to reach
+ * either. The Play button lived in that clipped bottom. `margin: auto` rather
+ * than `align-items: center` is what keeps a short dialog centred while leaving
+ * a tall one fully scrollable instead of clipping its top.
+ */
+.modal-veil {
+  position: fixed; inset: 0; z-index: 350;
+  background: rgba(4, 6, 5, 0.6);
+  display: flex; align-items: center; justify-content: center;
+  overflow-y: auto; overscroll-behavior: contain;
+  padding: 28px 20px;
+  animation: fade var(--dur-2) var(--ease);
+}
 @keyframes fade { from { opacity: 0; } }
 body.perf-noanim .modal-veil { animation: none; }
-.modal { width: min(480px, 92vw); background: var(--surface-1); border: 1px solid var(--line-strong); border-radius: var(--radius-lg); padding: 26px; box-shadow: var(--shadow-2); animation: pop calc(200ms * var(--speed)) var(--ease); }
+.modal {
+  width: min(480px, 92vw); margin: auto;
+  max-height: calc(100vh - 56px);
+  display: flex; flex-direction: column; min-height: 0;
+  background: var(--surface-1); border: 1px solid var(--line-strong);
+  border-radius: var(--radius-lg); padding: 26px; box-shadow: var(--shadow-2);
+  animation: pop calc(200ms * var(--speed)) var(--ease);
+}
 @keyframes pop { from { transform: scale(0.96); opacity: 0; } }
 body.perf-noanim .modal { animation: none; }
-.modal h3 { font-size: 17px; font-weight: 800; margin-bottom: 8px; }
-.modal .m-body { color: var(--text-2); font-size: 13.5px; line-height: 1.55; margin-bottom: 22px; }
-.modal .m-actions { display: flex; justify-content: flex-end; gap: 10px; }
+.modal h3 { font-size: 17px; font-weight: 800; margin-bottom: 8px; flex: none; }
+.modal .m-body {
+  color: var(--text-2); font-size: 13.5px; line-height: 1.55; margin-bottom: 22px;
+  /* min-height: 0 is what lets this shrink inside the flex column and scroll
+     instead of pushing the action bar off the bottom of the screen. */
+  flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain;
+}
+.modal .m-actions { display: flex; justify-content: flex-end; gap: 10px; flex: none; }
+/* A scrollbar that only appears while scrolling keeps the panel calm at rest. */
+.modal .m-body::-webkit-scrollbar { width: 10px; }
+.modal .m-body::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: 999px; border: 3px solid transparent; background-clip: content-box; }
+.modal .m-body::-webkit-scrollbar-track { background: transparent; }
 
 /* ---------- Search results / command palette ---------- */
 .palette-veil { position: fixed; inset: 0; z-index: 320; background: rgba(4,6,5,0.55); display: flex; justify-content: center; padding-top: 12vh; animation: fade var(--dur-1) var(--ease); }
