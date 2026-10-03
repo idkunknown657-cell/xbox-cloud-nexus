@@ -13,28 +13,41 @@ const PORT = process.env.CDP_PORT || '9222';
 
 const HEIGHTS = [1080, 900, 800, 720, 640];
 
-const OPEN = `(() => {
-  // A fresh profile starts behind the intro wizard and the sign-in gateway.
-  // Neither is what this probe is about, so clear them first.
-  for (const sel of ['.wz-btn', '.wizard .btn', '[data-wizard-skip]']) {
-    const b = [...document.querySelectorAll(sel)].find(x => /skip|next|finish|done|got it/i.test(x.textContent));
-    if (b) { b.click(); return 'cleared ' + sel; }
+/*
+ * Home's "Play Now" calls launchGame() directly and never opens this dialog, so
+ * the route under test is Game Details -> Play Now. The wizard and the sign-in
+ * gateway are cleared first because a fresh profile starts behind them.
+ */
+const STEP = `(() => {
+  const byText = (sel, re) => [...document.querySelectorAll(sel)].find(x => re.test(x.textContent.trim()));
+  if (document.querySelector('.modal')) return 'dialog-open';
+  if (document.querySelector('.overlay-card')) {
+    const play = byText('.overlay-card button', /^play now$/i) || byText('.overlay-card button', /^play$/i);
+    if (play) { play.click(); return 'clicked-play'; }
+    return 'overlay-without-play';
   }
-  const skip = [...document.querySelectorAll('.signin-gate .btn')].find(x => /browse without/i.test(x.textContent));
-  if (skip) { skip.click(); return 'cleared gate'; }
-  const b = [...document.querySelectorAll('button')].find(x => x.textContent.trim() === 'Play Now');
-  if (!b) return 'no Play Now button';
-  b.click();
-  return 'clicked';
+  const gate = byText('.signin-gate .btn', /browse without/i);
+  if (gate) { gate.click(); return 'cleared-gate'; }
+  const wz = byText('button', /^(skip|next|finish|done|got it)$/i);
+  if (wz && document.querySelector('.wizard, .wz, [class*="wizard"]')) { wz.click(); return 'cleared-wizard'; }
+  const details = byText('button', /^game details$/i);
+  if (details) { details.click(); return 'clicked-details'; }
+  const home = byText('.nav-item', /^home$/i);
+  if (home) { home.click(); return 'clicked-home'; }
+  return 'stuck';
 })()`;
 
-/** Clears the wizard / gateway and lands on Home. Returns when Play Now is there. */
-async function reachHome() {
-  for (let i = 0; i < 8; i++) {
-    const r = await evaluate(OPEN);
-    if (r === 'clicked') return true;
-    await wait(700);
+/** Walks Home -> Game Details -> Play Now until the launch dialog is open. */
+async function openDialog() {
+  let last = '';
+  for (let i = 0; i < 12; i++) {
+    const r = await evaluate(STEP);
+    if (r === 'dialog-open') return true;
+    if (r === 'stuck') break;
+    if (r === 'overlay-without-play') { last = r; break; }
+    await wait(600);
   }
+  if (last) console.error(`  (could not open the dialog: ${last})`);
   return false;
 }
 
@@ -108,9 +121,10 @@ const evaluate = async (expression) => {
 };
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 const closeDialog = () => evaluate(`(() => {
-  const v = document.querySelector('.modal-veil');
-  if (v) { v.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); }
-  return !!document.querySelector('.modal-veil');
+  for (const sel of ['.modal', '.overlay-card']) {
+    document.querySelectorAll(sel).forEach(el => el.closest('[class*="veil"], .overlay-card')?.remove() || el.remove());
+  }
+  return !document.querySelector('.modal');
 })()`);
 
 const lines = [];
@@ -122,9 +136,9 @@ for (const height of HEIGHTS) {
   await closeDialog();
   await wait(300);
 
-  const opened = await reachHome();
-  if (!opened) { failures++; lines.push(`FAIL h=${height} could not reach the launch panel`); continue; }
-  await wait(600);
+  const opened = await openDialog();
+  if (!opened) { failures++; lines.push(`FAIL h=${height} could not open the launch dialog`); continue; }
+  await wait(500);
 
   const m = JSON.parse(await evaluate(PROBE));
   const bad = [];

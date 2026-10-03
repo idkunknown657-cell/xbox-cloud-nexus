@@ -254,6 +254,7 @@ npm run verify:entitlements  # 29 assertions on the account/access rules (real p
 npm run verify:auth        # 33 assertions on account identification, session states and the sign-in entry
 npm run verify:launch      # 18 assertions on the per-title launch route and its fallbacks
 npm run verify:layout      # 16 geometry checks on the Keyboard & Mouse panel (needs the app running)
+npm run verify:modal       # 5 height checks that the launch dialog keeps its Play button reachable (needs the app running)
 npm run windowtest         # launches a game window against a local stub and asserts it is really shown
 npm run uitest            # boots the real UI, tours every screen, 201 DOM assertions
 npm run smoke             # launches the app, verifies catalogue, store and preset plumbing
@@ -268,6 +269,10 @@ npx electron . --remote-debugging-port=9222
 ```
 
 Without it the probe exits 2 and says so instead of reporting a connection error.
+Both live probes measure the rendered app: `verify:layout` checks the Keyboard &
+Mouse panel never overlaps itself, `verify:modal` checks the launch dialog
+capped to the viewport with a scrolling body so Play stays reachable at any window
+height.
 
 The renderer suite drives the shipping code paths (real IPC, real windows) and covers the
 controls screen layout, remapping, conflicts, live input feedback, profiles, the sign-in
