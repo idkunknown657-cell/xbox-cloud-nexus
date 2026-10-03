@@ -1045,11 +1045,11 @@ function testPanel(ctx) {
     const cell = cells.get(btnId);
     if (!cell) return;
     cell.classList.add('lit');
-    cell.querySelector('.fill').style.width = '100%';
+    cell.querySelector('.fill').style.transform = 'scaleX(1)';
     clearTimeout(timers.get(btnId));
     timers.set(btnId, setTimeout(() => {
       cell.classList.remove('lit');
-      cell.querySelector('.fill').style.width = '0%';
+      cell.querySelector('.fill').style.transform = 'scaleX(0)';
       timers.delete(btnId);
     }, 260));
   };
@@ -1088,10 +1088,10 @@ function testPanel(ctx) {
       if (!cell) continue;
       if (b.value > 0.25) {
         cell.classList.add('lit');
-        cell.querySelector('.fill').style.width = `${Math.round(b.value * 100)}%`;
+        cell.querySelector('.fill').style.transform = `scaleX(${Math.max(0, Math.min(1, b.value))})`;
       } else if (!timers.has(id)) {
         cell.classList.remove('lit');
-        cell.querySelector('.fill').style.width = '0%';
+        cell.querySelector('.fill').style.transform = 'scaleX(0)';
       }
     }
   });

@@ -423,12 +423,26 @@ body.perf-noanim .card .shimmer { display: none; }
 
 /* Test mode pad */
 .testpad { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-.testpad .tp-cell { border: 1px solid var(--line); border-radius: 10px; padding: 10px; text-align: center; transition: all var(--dur-1) var(--ease); background: var(--surface-2); }
-.testpad .tp-cell.lit { background: var(--accent-soft); border-color: var(--accent); box-shadow: 0 0 14px var(--accent-soft); transform: scale(1.04); }
+/* `transition: all` here animated every property a lit cell changed, including
+   the ones that force layout — on the pad that reacts to live gamepad input.
+   Naming the properties keeps the feedback on the compositor. */
+.testpad .tp-cell {
+  border: 1px solid var(--line); border-radius: 10px; padding: 10px; text-align: center;
+  transition: background var(--dur-1) var(--ease), border-color var(--dur-1) var(--ease),
+              transform var(--dur-1) var(--ease);
+  background: var(--surface-2);
+}
+.testpad .tp-cell.lit { background: var(--accent-soft); border-color: var(--accent); transform: scale(1.04); }
 .testpad .tp-cell .tp-name { font-size: 11px; color: var(--text-3); font-weight: 600; }
 .testpad .tp-cell .tp-key { font-size: 13px; font-weight: 800; margin-top: 3px; }
 .testpad .tp-cell .tp-live { height: 8px; border-radius: 4px; background: var(--surface-3); margin-top: 8px; overflow: hidden; }
-.testpad .tp-cell .tp-live .fill { height: 100%; background: var(--accent); width: 0%; transition: width 60ms linear; }
+/* Scaled rather than resized: animating `width` relayouts the cell on every
+   input frame, which is exactly the cost that shows up as input lag. */
+.testpad .tp-cell .tp-live .fill {
+  height: 100%; width: 100%; background: var(--accent);
+  transform: scaleX(0); transform-origin: left center;
+  transition: transform 60ms linear;
+}
 
 /* Profiles */
 .profile-list { display: flex; flex-direction: column; gap: 8px; }
