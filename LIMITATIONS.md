@@ -92,6 +92,20 @@ offers — it makes that offering comfortable on a PC. These are the real limits
 - Regional availability is whatever the catalogue reports for the market in Settings →
   Cloud Gaming. A title offered in one region may be absent in another.
 
+## Launching a game
+
+- Pressing Play opens the official Xbox Cloud Gaming page and then routes it to the
+  title's own launch route (`/play/launch/<slug>/<productId>`), which is what starts the
+  stream. The slug is derived from the product title, so an unusual title can be rejected
+  by Xbox's router; the app retries with the slug Xbox itself uses, and falls back to the
+  title's own Play button if the router sends it to a store page.
+- Launching a title is **not** something the app can guarantee. If the account is signed
+  out, the region does not serve the title, or the title is not cloud playable, the
+  official page decides and the app says so rather than leaving a window open on a page
+  that is never a game. The specific reason is shown as a notification.
+- Streaming quality, server assignment and ad pre-rolls are entirely Xbox's. The app sets
+  video preferences through Better xCloud and does not touch the transport.
+
 ## Build and packaging
 
 - `npm run dist` uses `scripts/build-win.mjs`, which builds the unpacked app with

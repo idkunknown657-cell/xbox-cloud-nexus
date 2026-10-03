@@ -501,7 +501,6 @@ function controllerSection(ctx) {
           profileHeader(ctx),
           h('div.diagram-wrap', diagram),
         ]),
-        kbmPanel(ctx, api, { embedded: true }),
       ]),
       // -- right: profiles, live test, quick actions ----------------------------
       h('div.controls-rail', [
@@ -509,6 +508,13 @@ function controllerSection(ctx) {
         testCard(ctx, api),
         quickActionsCard(ctx, api),
       ]),
+      /*
+       * Keyboard & Mouse gets its own full-width row rather than living in the
+       * middle column. In a 460px column a 14-key row has to either scroll
+       * sideways or shrink into unreadable slivers, and the settings beside it
+       * had nowhere to go — which is exactly the overlap this section had.
+       */
+      h('div.controls-full', kbmPanel(ctx, api, { embedded: true })),
     ]),
     kbmFooter(),
   ]);

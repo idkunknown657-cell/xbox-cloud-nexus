@@ -288,11 +288,12 @@ body.perf-noanim .dd-menu { transition: none; opacity: 1; transform: none; }
 }
 .mapping-note svg { color: var(--accent); flex: 0 0 auto; margin-top: 1px; }
 
-.keyboard { display: flex; flex-direction: column; gap: 5px; }
+.keyboard { display: flex; flex-direction: column; gap: 5px; min-width: 540px; }
 .kb-row { display: flex; gap: 5px; justify-content: center; flex-wrap: nowrap; }
 .kb-key {
   /* A hard floor stops 14 keys collapsing into unreadable slivers when the
-     column is narrow: the panel scrolls sideways instead. */
+     column is narrow: the column scrolls sideways instead. 26px is the width at
+     which a single glyph plus its binding label still reads. */
   flex: var(--kw, 1) 1 0; min-width: 26px;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
   height: 44px; padding: 3px 4px; border-radius: 7px;

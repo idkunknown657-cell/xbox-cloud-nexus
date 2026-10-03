@@ -363,6 +363,17 @@ function relay(obj) { try { ipcRenderer.send('stream:event', obj); } catch { /* 
 window.addEventListener('gamepadconnected', (e) => relay({ kind: 'controller', connected: true, id: String((e.gamepad && e.gamepad.id) || '').slice(0, 60) }));
 window.addEventListener('gamepaddisconnected', () => relay({ kind: 'controller', connected: false }));
 
+// 6) Launch reporting.
+//
+// The per-title launch runs inside the page (it has to go through Xbox's own
+// router — see main/game-launch.cjs). It cannot talk to the main process
+// directly, so it reports through this one function, which is deliberately a
+// single narrow call rather than a general page->main channel.
+window.nexusLaunchReport = function nexusLaunchReport(state, reason) {
+  try { ipcRenderer.send('nexus-launch-report', String(state || ''), String(reason || '')); }
+  catch { /* the window may be closing */ }
+};
+
 // Boot order matters: prefs -> preset -> inject, all before page scripts.
 applyGlobalPrefs();
 applyStreamPrefs();

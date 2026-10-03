@@ -5,8 +5,9 @@
  * which asks the main process for its bundle via synchronous IPC.
  */
 const path = require('path');
-const { BrowserWindow, shell, session } = require('electron');
+const { BrowserWindow, shell, session, ipcMain } = require('electron');
 const { readAccount, AUTO_SIGNIN_SCRIPT, USER_INFO_KEY } = require('./xbox-account.cjs');
+const { productTitleToSlug, playUrl, launchUrl, launchScript } = require('./game-launch.cjs');
 
 const ALLOWED_STREAM_ORIGINS = new Set(['https://www.xbox.com']);
 
@@ -26,25 +27,31 @@ class WindowManager {
   /**
    * The official page we send people to for signing in.
    *
-   * /play is Xbox's own entry point: unauthenticated visitors are redirected to
-   * Microsoft's real sign-in flow, and the resulting session cookies land in the
-   * partition the game windows use, so one sign-in covers every later launch.
+   * This is Microsoft's own sign-in entry point with a return URL, the same one
+   * XFly uses (MIT, credited in README). Loading /play and then trying to find
+   * and click a "Sign in" control was the reason sign-in worked for some people
+   * and not others: the control is renamed, moved or already present depending
+   * on the region and on whether a session cookie is half-alive. The auth entry
+   * has no such variability — it always starts the real Microsoft flow and
+   * always comes back to the play page.
    */
   signInUrl(locale = 'en-US') {
-    const loc = String(locale || 'en-US').replace(/[^a-zA-Z-]/g, '');
-    return `https://www.xbox.com/${loc || 'en-US'}/play`;
+    const returnUrl = this.playUrl(locale);
+    if (process.env.NEXUS_SIGNIN_URL) return process.env.NEXUS_SIGNIN_URL;
+    return `https://www.xbox.com/auth/msa?action=logIn&returnUrl=${encodeURIComponent(returnUrl)}`;
   }
 
   /**
    * The official play page a game window loads.
    *
-   * Kept in one place (and overridable by the test harness) so the launch path
-   * can be exercised end to end without a Microsoft account or a live stream.
+   * This is the *catalogue*: it is where the sign-in session lives and where the
+   * in-page router is driven from. The specific title is started afterwards via
+   * /play/launch/<slug>/<productId> — see game-launch.cjs. Overridable by the
+   * test harness so the launch path can be exercised without a live stream.
    */
   playUrl(locale = 'en-US') {
     if (process.env.NEXUS_PLAY_URL) return process.env.NEXUS_PLAY_URL;
-    const loc = String(locale || 'en-US').replace(/[^a-zA-Z-]/g, '');
-    return `https://www.xbox.com/${loc || 'en-US'}/play`;
+    return playUrl(locale);
   }
 
   /** Domains the in-app sign-in window is allowed to navigate to itself. */
@@ -54,6 +61,26 @@ class WindowManager {
       if (u.protocol !== 'https:' && u.protocol !== 'http:') return false;
       return /(^|\.)(xbox\.com|xboxlive\.com|live\.com|microsoft\.com|microsoftonline\.com|msftauth\.net|msauth\.net|msn\.com|office\.com|akamaihd\.net|windows\.net)$/.test(u.hostname);
     } catch { return false; }
+  }
+
+  /**
+   * Drop the stored Xbox session.
+   *
+   * Clearing the app's own account fields is not enough: the stale cookies and
+   * cached service worker in the shared partition keep sending the next window
+   * to a half-signed-in page that looks signed in and streams nothing. XFly
+   * clears storage and cache on sign-out for the same reason (MIT).
+   */
+  async clearSession() {
+    try {
+      await session.fromPartition('persist:stream').clearStorageData();
+      await session.fromPartition('persist:stream').clearCache();
+      this.log.info('auth', 'signed out: xbox session storage cleared');
+      return true;
+    } catch (err) {
+      this.log.warn('auth', 'could not clear the xbox session:', err.message);
+      return false;
+    }
   }
 
   /**
@@ -399,6 +426,9 @@ class WindowManager {
 
     win.webContents.on('did-finish-load', () => {
       this.sendToRenderer('stream:status', { productId, state: 'loaded', title: opts.title });
+      // The catalogue page is up; now hand it the specific title. The router
+      // needs the page rendered, so this waits for the load instead of racing it.
+      armLaunch();
     });
     // A page that never arrives must not look like a successful launch: say so,
     // and leave the window up so the player can see (and retry) it.
@@ -431,8 +461,51 @@ class WindowManager {
       this.streamWindows.delete(productId);
       this.sendToRenderer('stream:status', { productId, state: 'closed', title: opts.title });
     });
+    win.__nexusLaunchDead = false;
 
     this.streamWindows.set(productId, win);
+
+    // A page that never reaches the launch route is a failed launch, and the
+    // player deserves to know which of the two it was.
+    const slug = productTitleToSlug(opts.title || 'game');
+    const armLaunch = () => {
+      if (win.isDestroyed() || win.__nexusLaunchDead) return;
+      // Re-injected on EVERY load, including the one the launch itself causes.
+      // A one-shot guard looked tidier but meant the script's timers were
+      // destroyed by the very navigation it started, so the page never
+      // reported back and a stalled launch looked like a silent success.
+      try {
+        win.webContents.executeJavaScript(launchScript({ slug, productId, locale }), true)
+          .catch(() => { /* the window may already be gone */ });
+      } catch { /* ignore */ }
+    };
+    this.log.info('stream', `launch -> ${launchUrl(locale, slug, productId)} (${opts.title})`);
+    // One listener for the whole app: registered per launch it would pile up a
+    // handler per game, each one filtering the same events.
+    if (!this.__launchReportWired) {
+      this.__launchReportWired = true;
+      ipcMain.on('nexus-launch-report', (event, state, reason) => {
+        const pid = this.productIdForWebContents(event.sender);
+        if (!pid) return;
+        const win = this.streamWindows.get(pid);
+        if (state === 'starting') {
+          this.sendToRenderer('stream:status', { productId: pid, state: 'starting' });
+          return;
+        }
+        if (state !== 'denied') return;
+        this.log.warn('stream', `launch refused for ${pid}:`, String(reason).slice(0, 160));
+        this.sendToRenderer('stream:status', { productId: pid, state: 'denied', reason: String(reason || '') });
+        // The page clears itself by going back to the catalogue, which reloads
+        // it and would re-run the whole launch — an endless cycle of failed
+        // launches and repeated notifications. Close it instead: the launcher
+        // already carries the reason, and the next Play press opens a clean one.
+        if (win && !win.isDestroyed()) {
+          win.__nexusLaunchDead = true;
+          if (win.__nexusLaunchTimer) clearTimeout(win.__nexusLaunchTimer);
+          win.__nexusLaunchTimer = setTimeout(() => { try { win.close(); } catch { /* already gone */ } }, 1200);
+        }
+      });
+    }
 
     const url = this.playUrl(locale);
 

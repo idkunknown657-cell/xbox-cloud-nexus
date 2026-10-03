@@ -108,5 +108,27 @@ try {
   ok('the injected script is syntactically valid', false, err.message);
 }
 
+// ---------- The sign-in entry point ----------
+//
+// Sign-in used to load /play and then hunt for a "Sign in" control to click.
+// That control varies by region and by leftover session state, which is why it
+// worked for one account and not another. Microsoft's auth entry has no such
+// variability, so the URL itself is asserted here.
+const { WindowManager } = require('../src/main/windows.cjs');
+const wm = Object.create(WindowManager.prototype);
+const signInUrl = wm.signInUrl('en-US');
+
+ok('sign-in starts at Microsoft\'s own auth entry', signInUrl.startsWith('https://www.xbox.com/auth/msa?'));
+ok('sign-in asks for a login', /[?&]action=logIn\b/.test(signInUrl));
+{
+  const ret = new URL(signInUrl).searchParams.get('returnUrl') || '';
+  ok('sign-in returns to the official play page', ret === 'https://www.xbox.com/en-US/play', ret);
+}
+ok('a locale cannot escape the xbox origin', !wm.signInUrl('evil.example.com/x').includes('evil.example.com'));
+ok('the auth host is one the sign-in window may navigate to',
+  WindowManager.signInHostAllowed(signInUrl), 'xbox.com/auth/msa');
+ok('the return url host is one the sign-in window may navigate to',
+  WindowManager.signInHostAllowed('https://www.xbox.com/en-US/play'));
+
 console.log(fail === 0 ? `\nAUTH OK — ${pass} checks passed` : `\nAUTH FAILED — ${fail} of ${pass + fail}`);
 process.exit(fail === 0 ? 0 : 1);

@@ -119,11 +119,13 @@ await window.nexus.settings.set('account.planSource', '');
         return !!w && w.open;
       }, 12000);
       ok('sign-in window opens', up, JSON.stringify(await window.nexus.auth.windowState().catch(() => null)));
+      // The auth entry hands off to Microsoft login host, so the window
+      // legitimately ends on login.live.com rather than on xbox.com.
       const onXbox = await waitFor(async () => {
         const w = await window.nexus.auth.windowState().catch(() => null);
-        return !!w && /xbox\.com/.test(w.url || '');
+        return !!w && /\.(xbox|live|microsoft|msftauth)\./.test(w.url || '');
       }, 30000);
-      ok('sign-in window loads the official Xbox page', onXbox,
+      ok('sign-in window reaches an official Microsoft page', onXbox,
          (await window.nexus.auth.windowState().catch(() => ({}))).url);
       await window.nexus.auth.closeWindow().catch(() => {});
       await sleep(400);
@@ -355,7 +357,15 @@ if (ss) {
   ok('account panel never collects a password', $$('#main input[type="password"]').length === 0,
      $$('#main input[type="password"]').length);
   const url = await window.nexus.auth.signInUrl().catch(() => '');
-  ok('sign-in URL points at the official play page', /^https:\\/\\/www\\.xbox\\.com\\/.+\\/play$/.test(url), url);
+  // Sign-in starts at Microsoft's own auth entry rather than the play page: the
+  // play page has no guaranteed sign-in control to click, which is what made
+  // sign-in work for one account and not another.
+  ok('sign-in URL is the Microsoft auth entry', url.indexOf('https://www.xbox.com/auth/msa?action=logIn&') === 0, url);
+  // String tests, not regex literals: the surrounding template literal eats
+  // backslash escapes, so a regex here would be silently mangled.
+  const returnParam = url.split('returnUrl=')[1] || '';
+  ok('sign-in returns to the official play page',
+     returnParam.indexOf('https%3A%2F%2Fwww.xbox.com%2F') === 0 && returnParam.slice(-7) === '%2Fplay', returnParam);
   const st = await window.nexus.auth.windowState().catch(() => null);
   ok('sign-in window state is queryable', !!st && typeof st.open === 'boolean', JSON.stringify(st));
 }
@@ -470,8 +480,13 @@ ok('footer explains controller translation',
     ok('keyboard panel and mouse card never overlap', !(ox > 1 && oy > 1),
        'overlap ' + Math.round(ox) + 'x' + Math.round(oy));
     const sideBySide = ox <= 1;
-    ok('mouse card sits beside or below the keyboard', sideBySide ? oy <= 1 : oy <= -20 || R.top >= L.bottom,
-       sideBySide ? 'side-by-side' : 'stacked');
+    // Side-by-side columns legitimately share vertical space — that is what a
+    // two-column grid is. What must hold is that they are flush at the top.
+    // Stacked, the mouse card has to start below the keyboard panel, or it is
+    // sitting on top of it.
+    ok('mouse card sits beside or below the keyboard',
+       sideBySide ? Math.abs(R.top - L.top) <= 8 : R.top >= L.bottom - 1,
+       sideBySide ? 'side-by-side, tops ' + Math.round(Math.abs(R.top - L.top)) + 'px apart' : 'stacked');
     const keyboard = $('.keyboard');
     if (keyboard) {
       const k = keyboard.getBoundingClientRect();

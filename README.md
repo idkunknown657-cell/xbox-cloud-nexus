@@ -288,11 +288,16 @@ check that catches a silent launch, where the window is created but never shown.
 
 - [Better xCloud](https://github.com/redphx/better-xcloud) by **redphx** — the
   mouse/keyboard-to-controller emulation and stream enhancements this app builds on (MIT).
-- [XFly](https://github.com/m669st/XFly) — the account-identification approach used here
-  (reading the official `xboxcom_xbl_user_info` session record and the `XBXXtk` session
-  cookie, and driving Microsoft's own sign-in control) was adapted from XFly's MIT-licensed
-  implementation. Our code, architecture and error handling are our own; no XFly code was
-  copied verbatim.
+- [XFly](https://github.com/m669st/XFly) — three approaches used here were adapted from
+  XFly's MIT-licensed implementation:
+  1. **Account identification** — reading the official `xboxcom_xbl_user_info` session
+     record and the `XBXXtk` session cookie.
+  2. **Sign-in entry** — starting at Microsoft's own
+     `/auth/msa?action=logIn&returnUrl=…` endpoint rather than hunting for a sign-in
+     control on the play page, which is what made sign-in reliable across accounts.
+  3. **Game launching** — routing to `/play/launch/<slug>/<productId>`, retrying with the
+     slug Xbox's router actually uses, and falling back to the title's own Play button.
+  Our code, architecture and error handling are our own; no XFly code was copied verbatim.
 - Xbox Cloud Gaming catalogue and artwork belong to Microsoft; this project is
   unaffiliated with Microsoft.
 

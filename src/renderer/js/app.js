@@ -230,7 +230,16 @@ function wireEvents() {
     if (!payload) return;
     if (payload.state === 'loaded') { markStreamOpen(payload.productId); toastInfo(t('launched'), payload.title || ''); }
     else if (payload.state === 'closed') { markStreamClosed(payload.productId); }
-    else if (payload.state === 'error') {
+    else if (payload.state === 'starting') {
+      // The window opened the catalogue; the router is now taking us to the game.
+      toastInfo('Starting…', payload.title || '');
+    } else if (payload.state === 'denied') {
+      // Xbox itself refused the title. Saying so beats a window that sits on a
+      // page which is never going to become a game.
+      markStreamClosed(payload.productId);
+      toastErr(new Error(payload.reason || 'not launchable'), 'Could not start this game');
+      if (payload.reason) toastInfo(payload.reason);
+    } else if (payload.state === 'error') {
       // The window opened but the page did not: never leave it looking launched.
       toastErr(new Error(payload.reason || 'page failed'), t('stream_crashed'));
       toastInfo('Xbox’s play page did not load. Check your connection and press Play again.');

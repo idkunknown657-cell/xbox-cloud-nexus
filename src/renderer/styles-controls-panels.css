@@ -15,6 +15,8 @@
 }
 .controls-mid { display: flex; flex-direction: column; gap: 24px; min-width: 0; }
 .controls-rail { display: flex; flex-direction: column; gap: 20px; min-width: 0; position: sticky; top: 74px; }
+/* A full-width section spanning every column of the controls grid. */
+.controls-full { grid-column: 1 / -1; min-width: 0; }
 
 /*
  * The columns answer to the *panel* width, not the window width: with a window
@@ -133,25 +135,70 @@
 .qa-badge.on { opacity: 1; transform: scale(1); }
 
 /* ---------- Keyboard & Mouse panel ---------- */
-.kbm-panel { display: flex; flex-direction: column; }
-.kbm-split { display: grid; grid-template-columns: minmax(0, 1fr) 268px; gap: 26px; align-items: start; }
-/* Below ~900px of panel the two cannot coexist: the keyboard alone wants
-   520px, the mouse card 268px, plus the gap and the panel padding. Stack
-   instead of squeezing. */
-@container mid (max-width: 900px) {
+/*
+ * The panel is its own query container.
+ *
+ * This panel is rendered on two routes: embedded in the middle column of the
+ * Controls screen, and standalone under Settings. The stacking rule used to
+ * query a container named `mid`, which only exists on the first one — so on the
+ * second the split stayed two-column inside a 534px panel, the 520px keyboard
+ * overflowed its 266px column, and it painted straight over the Mouse Settings
+ * card. Querying the panel itself means the rule resolves wherever it renders.
+ */
+.kbm-panel { display: flex; flex-direction: column; container-type: inline-size; container-name: kbm; }
+
+.kbm-split {
+  display: grid;
+  /* Floor the keyboard column at a readable keyboard and the settings column at
+     a usable slider row; both are mins, so a wide panel grows the keyboard.
+     540px is the width at which 14 keys plus their gaps still get ~34px each —
+     below that they are vertical slivers, which is worse than stacking. */
+  grid-template-columns: minmax(var(--kbm-keys, 540px), 1fr) minmax(232px, 268px);
+  gap: 26px; align-items: start;
+}
+/* Below keyboard + gap + settings the two cannot coexist, so stack instead of
+   squeezing one of them into the other. */
+@container kbm (max-width: 797px) {
   .kbm-split { grid-template-columns: minmax(0, 1fr); }
 }
-/* A keyboard needs room to look like a keyboard: scroll the panel rather than
-   letting 14 keys collapse into vertical slivers. */
+/* Last-resort guard: a keyboard smaller than this would be vertical slivers, so
+   the column scrolls sideways rather than crushing it. */
 .kbm-left { min-width: 0; overflow-x: auto; }
-.keyboard { min-width: 520px; }
 .kbm-tab-body { min-height: 224px; }
+/* Under 540px the keyboard steps down instead of overflowing: shorter keys, a
+   tighter row gap, and a floor low enough to fit the narrowest window. Only
+   below ~430px — where 14 keys genuinely cannot fit — does it scroll. */
+@container kbm (max-width: 540px) {
+  .keyboard { min-width: 0; gap: 4px; }
+  .kb-row { gap: 4px; }
+  .kb-key { height: 38px; min-width: 0; padding: 2px; font-size: 10px; }
+  .kb-glyph { font-size: 9.5px; }
+  .kb-bind { font-size: 8px; }
+}
+/* 14 keys across a phone-width panel is the physical limit of this layout; take
+   the last of the padding out rather than letting a row overflow. */
+@container kbm (max-width: 500px) {
+  .keyboard { gap: 3px; }
+  .kb-row { gap: 3px; }
+  .kb-key { padding: 1px; border-radius: 5px; }
+}
+@container kbm (max-width: 430px) {
+  .keyboard { min-width: 430px; }
+}
 .mouse-card .mini-head { margin-bottom: 10px; }
 .mouse-card .row.compact { padding: 12px 0; border-bottom: 1px solid var(--line); }
-.mouse-card .row.compact:last-child { border-bottom: none; }
 .mouse-card .r-title { font-size: 12.5px; }
 .mouse-card .slider-row { gap: 8px; }
 .mouse-card .slider-val { min-width: 42px; font-size: 12px; }
+
+/* When the panel is full width the settings card stops being a tall thin
+   ribbon of half-empty rows and lays itself out in columns instead. */
+.mouse-card {
+  display: grid; align-content: start;
+  grid-template-columns: repeat(auto-fit, minmax(238px, 1fr));
+  gap: 0 26px;
+}
+.mouse-card > .mini-head { grid-column: 1 / -1; }
 
 /* ---------- Mouse artwork ---------- */
 .mouse-wrap { display: grid; place-items: center; padding: 10px 0 4px; }
