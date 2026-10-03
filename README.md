@@ -248,15 +248,26 @@ Node 20+ and Windows are expected for packaging.
 ## Testing
 
 ```bash
-npm run verify            # both offline suites below
+npm run verify            # every offline suite below
 npm run verify:bridge     # 57 assertions on the profile -> Better xCloud preset converter
 npm run verify:entitlements  # 29 assertions on the account/access rules (real payload fixtures)
-npm run verify:auth        # 27 assertions on account identification and session states
+npm run verify:auth        # 33 assertions on account identification, session states and the sign-in entry
+npm run verify:launch      # 18 assertions on the per-title launch route and its fallbacks
+npm run verify:layout      # 16 geometry checks on the Keyboard & Mouse panel (needs the app running)
 npm run windowtest         # launches a game window against a local stub and asserts it is really shown
-npm run uitest            # boots the real UI, tours every screen, 200 DOM assertions
+npm run uitest            # boots the real UI, tours every screen, 201 DOM assertions
 npm run smoke             # launches the app, verifies catalogue, store and preset plumbing
 npm run screenshots       # regenerates docs/screenshots/ from the shipping UI
 ```
+
+`npm run verify:layout` measures the rendered app rather than a mock, so start the app
+first in another terminal:
+
+```bash
+npx electron . --remote-debugging-port=9222
+```
+
+Without it the probe exits 2 and says so instead of reporting a connection error.
 
 The renderer suite drives the shipping code paths (real IPC, real windows) and covers the
 controls screen layout, remapping, conflicts, live input feedback, profiles, the sign-in
@@ -268,6 +279,11 @@ data the app reads in production.
 `npm run windowtest` drives the real `launchGame()` against a local stub page and asserts
 the game window is actually on screen the moment the launcher reports “launched” — the
 check that catches a silent launch, where the window is created but never shown.
+
+`npm run verify:launch` runs the real in-page launch driver against a simulated xCloud
+page and asserts it routes to `/play/launch/<slug>/<productId>`, retries with the slug
+Xbox's own router uses, presses a store page's Play button when that is what the title
+needs, and refuses with the actual reason when a launch cannot succeed.
 
 ---
 

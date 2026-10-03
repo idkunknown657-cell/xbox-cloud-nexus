@@ -47,9 +47,25 @@ const PROBE = `(() => {
   });
 })()`;
 
-const targets = await (await fetch(`http://127.0.0.1:${PORT}/json/list`)).json();
+// This probe measures the real rendered app, so it needs the app running with
+// the debugging port open. Failing with a raw connection stack trace would look
+// like the probe is broken rather than the precondition being missing.
+let targets;
+try {
+  targets = await (await fetch(`http://127.0.0.1:${PORT}/json/list`)).json();
+} catch {
+  console.error(`LAYOUT SKIPPED — nothing is listening on 127.0.0.1:${PORT}.`);
+  console.error('Start the app first:');
+  console.error('  npx electron . --remote-debugging-port=9222');
+  process.exit(2);
+}
 const page = targets.filter((t) => t.type === 'page').find((t) => /nexus:\/\/app/.test(t.url));
-if (!page) throw new Error('the app is not running with --remote-debugging-port=' + PORT);
+if (!page) {
+  console.error(`LAYOUT SKIPPED — port ${PORT} is open but the launcher window is not there.`);
+  console.error('Start the app first:');
+  console.error('  npx electron . --remote-debugging-port=9222');
+  process.exit(2);
+}
 
 const ws = new WebSocket(page.webSocketDebuggerUrl);
 await new Promise((res, rej) => {
