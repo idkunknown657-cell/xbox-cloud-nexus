@@ -44,6 +44,16 @@ contextBridge.exposeInMainWorld('nexus', {
     import: () => call('profiles:import'),
     assignGame: (pid, profileId) => call('profiles:assignGame', pid, profileId),
   },
+  auth: {
+    status: (probe) => call('auth:status', { probe: probe === true }),
+    signIn: () => call('auth:signIn'),
+    signOut: () => call('auth:signOut'),
+    closeWindow: () => call('auth:closeWindow'),
+    openInBrowser: () => call('auth:openInBrowser'),
+    windowState: () => call('auth:windowState'),
+    signInUrl: () => call('auth:signInUrl'),
+    setPlan: (plan) => call('auth:setPlan', plan),
+  },
   window: {
     minimize: () => call('win:minimize'),
     maximizeToggle: () => call('win:maximizeToggle'),
@@ -55,5 +65,8 @@ contextBridge.exposeInMainWorld('nexus', {
     streamStatus: on('stream:status'),
     controllers: on('controllers:changed'),
     catalogDetails: on('catalog:details'),
+    authChanged: on('auth:changed'),
+    authError: on('auth:error'),
+    openControls: on('app:open-controls'),
   },
 });

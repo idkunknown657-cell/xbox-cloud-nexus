@@ -18,10 +18,11 @@ import { toastOk, toastInfo, toastWarn, toastErr } from '../toast.js';
 import { sfx } from '../sfx.js';
 import {
   BUTTONS, BUTTON_BY_ID, buttonLabel, bindLabel, captureFromEvent,
-  findConflicts, sanitizeMapping, makeProfileId, isMouseCode,
+  findConflicts, sanitizeMapping, makeProfileId, isMouseCode, keyCodeForGlyph, VALID_CODES,
 } from '../buttons.js';
 import { controllerDiagram } from './controller-diagram.js';
 import { watch, PAD_INDEX_TO_BTN } from '../gamepad.js';
+import { profilesRail, testCard, quickActionsCard, kbmPanel, mouseSettingsCard } from './controls-panels.js';
 import { dropdown, slider, toggle, segmented } from '../ui-kit.js';
 import * as cat from '../catalog.js';
 
@@ -32,6 +33,8 @@ let listening = false;
 let profileId = null;
 let diagram = null;          // live diagram node, for incremental updates
 let rowNodes = new Map();    // buttonId -> key element in the list
+let conflictBadge = null;    // badge element on the Quick Actions "Conflict check" row
+const flashTimers = new Map();
 let repaint = () => {};
 let leaveHooks = [];
 let gameCtxId = null;      // set when the controls screen is opened for one game
@@ -140,11 +143,22 @@ async function setBinding(btnId, bind) {
   if (!p) return;
   const mapping = sanitizeMapping({ ...p.mapping, [btnId]: bind });
   await patchProfile({ mapping });
-  // Incremental: two text nodes, no rebuild.
+  // Incremental: a handful of text nodes, never a rebuild.
   if (diagram) diagram.paintOne(btnId, mapping);
+  paintRow(btnId, bind);
+  refreshConflictBadge();
+}
+
+/**
+ * A binding can appear in the mapping list, in the rail's live table and on the
+ * controller artwork, so paint every place it shows up. All of them are text
+ * nodes, which is what keeps remapping instant on a low-end machine.
+ */
+function paintRow(btnId, bind) {
+  const text = bind ? bindLabel(bind) : '—';
   const row = rowNodes.get(btnId);
-  if (row) {
-    row.textContent = bind ? bindLabel(bind) : t('unassigned');
+  if (row && row.textContent !== text) {
+    row.textContent = text;
     row.classList.toggle('unset', !bind);
   }
 }
@@ -173,6 +187,10 @@ function installCapture(ctx) {
     if (!listening) return;
     const capture = captureFromEvent(e);
     if (!capture || capture.blocked) return;
+    // While listening, the click belongs to the remap: it must not also press
+    // whatever control sits under the pointer (nav item, chip, other row).
+    e.preventDefault();
+    e.stopPropagation();
     const btnId = selectedId;
     disarm();
     await applyBinding(ctx, capture, btnId);
@@ -193,6 +211,67 @@ function blockedReason(reason, code) {
 }
 
 function disarm() { listening = false; if (diagram) diagram.setSelection(selectedId, null); }
+
+/** Chips whose label is a word rather than a letter need a wider badge. */
+const WORD_LABELS = new Set(['View', 'Menu', 'Xbox', 'LS', 'RS', 'L3', 'R3']);
+function isWordLabel(label) { return WORD_LABELS.has(label) || String(label).length > 2; }
+
+/** Spoken/descriptive name per input, used by tooltips and a11y labels. */
+const BTN_NAMES = {
+  gamepadA: 'A button', gamepadB: 'B button', gamepadX: 'X button', gamepadY: 'Y button',
+  gamepadLB: 'Left bumper', gamepadRB: 'Right bumper', gamepadLT: 'Left trigger', gamepadRT: 'Right trigger',
+  gamepadSelect: 'View button', gamepadStart: 'Menu button', gamepadGuide: 'Xbox button',
+  gamepadLS: 'Left stick click', gamepadRS: 'Right stick click',
+  gamepadDUp: 'D-Pad up', gamepadDDown: 'D-Pad down', gamepadDLeft: 'D-Pad left', gamepadDRight: 'D-Pad right',
+  gamepadLSU: 'Left stick up', gamepadLSD: 'Left stick down', gamepadLSL: 'Left stick left', gamepadLSR: 'Left stick right',
+  gamepadRSU: 'Right stick up', gamepadRSD: 'Right stick down', gamepadRSL: 'Right stick left', gamepadRSR: 'Right stick right',
+};
+
+/**
+ * Live feedback: light one input on the artwork and in the mapping list, then
+ * fade it out. Used by the test card so a keypress or pad press is visible
+ * everywhere the binding appears — the "real time" reaction players expect.
+ */
+function flash(id, ms = 220) {
+  if (!id) return;
+  if (diagram?.flash) diagram.flash(id, true);
+  const row = rowNodes.get(id)?.closest('.map-item');
+  if (row) row.classList.add('live');
+  clearTimeout(flashTimers.get(id));
+  flashTimers.set(id, setTimeout(() => {
+    if (diagram?.flash) diagram.flash(id, false);
+    const r = rowNodes.get(id)?.closest('.map-item');
+    if (r) r.classList.remove('live');
+    flashTimers.delete(id);
+  }, ms));
+}
+
+/** Every key that currently drives more than one controller input. */
+function conflictList() {
+  const mapping = sanitizeMapping(activeProfile()?.mapping);
+  const seen = new Map();
+  for (const b of BUTTONS) {
+    // Stick-direction chips intentionally share codes with the D-pad, so they
+    // are never reported as conflicts.
+    if (STICK_DIR_IDS.has(b.id)) continue;
+    const code = mapping[b.id]?.code;
+    if (!code) continue;
+    seen.set(code, [...(seen.get(code) || []), b]);
+  }
+  return [...seen.entries()].filter(([, arr]) => arr.length > 1);
+}
+
+/** Recount duplicate bindings and update the Quick Actions badge. */
+function refreshConflictBadge() {
+  if (!conflictBadge) return;
+  const n = conflictList().length;
+  conflictBadge.textContent = n ? String(n) : '';
+  conflictBadge.classList.toggle('on', n > 0);
+  conflictBadge.title = n ? `${n} key${n > 1 ? 's' : ''} bound to more than one input` : 'No conflicts';
+}
+
+const STICK_DIR_IDS = new Set(['gamepadLSU', 'gamepadLSD', 'gamepadLSL', 'gamepadLSR',
+  'gamepadRSU', 'gamepadRSD', 'gamepadRSL', 'gamepadRSR']);
 
 async function applyBinding(ctx, capture, buttonId) {
   const profile = activeProfile();
@@ -377,10 +456,15 @@ function controllerSection(ctx) {
       if (!btn) continue;
       const bind = mapping[id];
       const keyEl = h(`span.map-key${bind ? '' : '.unset'}`, bind ? bindLabel(bind) : '—');
-      const row = h(`button.map-item${id === selectedId ? '.selected' : ''}`, {
+      // One row = the input chip plus what it is bound to. The full name lives in
+      // the tooltip and aria-label, so nothing is repeated and the column never
+      // has to compete for width with three labels.
+      const name = BTN_NAMES[id] || btn.label;
+      const row = h(`button.map-item${id === selectedId ? '.selected' : ''}${isWordLabel(btn.label) ? '.wide-badge' : ''}`, {
         type: 'button',
         dataset: { btn: id },
-        title: `Click, then press a key or mouse button to map ${btn.label}`,
+        title: `${name} — ${bind ? `bound to ${bindLabel(bind)}` : 'unassigned'}. Click, then press a key or mouse button.`,
+        'aria-label': `${name}, ${bind ? bindLabel(bind) : 'unassigned'}`,
         onclick: () => {
           selectedId = id;
           listening = true;
@@ -388,7 +472,6 @@ function controllerSection(ctx) {
         },
       }, [
         h(`span.map-badge.fb-${btn.label.toLowerCase().replace(/[^a-z0-9]/g, '')}`, btn.label),
-        h('span.map-name', btn.label === 'LS' || btn.label === 'RS' ? `${btn.label} Click` : btn.label),
         keyEl,
         h('span.map-chevron', icon('chevronRight', { size: 14 })),
       ]);
@@ -398,45 +481,75 @@ function controllerSection(ctx) {
   }
 
   return h('div.controller-section', [
-    h('div.panel.panel-flush', [
-      h('div.panel-head', [
-        h('div', [
-          h('h3', 'Controller Mapping'),
-          h('p.p-desc', 'Customize your controller and keyboard/mouse inputs. All games use this mapping — even controller-only games.'),
-        ]),
-        h('span.kbm-live', [h('span.dot'), t('kbm_supported')]),
-      ]),
-      profileHeader(ctx),
-      h('div.mapping-grid', [
+    h('div.controls-3col', [
+      // -- left: the mapping list -------------------------------------------------
+      h('div.panel.panel-tight.map-card', [
+        h('div.mini-head', [icon('controller', { size: 15 }), h('h4', 'Controller Mapping')]),
+        devicePicker(),
         h('div.map-list-wrap', list),
-        h('div.diagram-wrap', diagram),
+      ]),
+      // -- middle: live artwork + keyboard/mouse -------------------------------
+      h('div.controls-mid', [
+        h('div.panel.panel-flush', [
+          h('div.panel-head', [
+            h('div', [
+              h('h3', 'Controller Mapping'),
+              h('p.p-desc', 'Customize your controller and keyboard/mouse inputs. All games use this mapping — even controller-only games.'),
+            ]),
+            h('span.kbm-live', [h('span.dot'), t('kbm_supported')]),
+          ]),
+          profileHeader(ctx),
+          h('div.diagram-wrap', diagram),
+        ]),
+        kbmPanel(ctx, api, { embedded: true }),
+      ]),
+      // -- right: profiles, live test, quick actions ----------------------------
+      h('div.controls-rail', [
+        profilesRail(ctx, api),
+        testCard(ctx, api),
+        quickActionsCard(ctx, api),
       ]),
     ]),
-    testPanel(ctx),
+    kbmFooter(),
   ]);
 }
 
-// ---------- Section: Keyboard & Mouse ----------
-const KEY_ROWS = [
-  { w: 1, keys: ['Escape', 'F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'F11', 'F12'] },
-  { w: 1.2, keys: ['`', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', 'Backspace'] },
-  { w: 1.5, keys: ['Tab', 'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '[', ']', '\\'] },
-  { w: 1.75, keys: ['Caps', 'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', ';', "'", 'Enter'] },
-  { w: 2.25, keys: ['Shift', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', ',', '.', '/', 'Shift'] },
-  { w: 2.75, keys: ['Ctrl', 'Win', 'Alt', 'Space', 'Alt', 'Win', 'Menu', 'Ctrl'] },
-];
+/** Attribution + the one-sentence explanation of how KBM translation works. */
+function kbmFooter() {
+  return h('div.kbm-footer', [
+    h('span.kf-note', [icon('info', { size: 15 }),
+      h('span', 'Keyboard and mouse input is converted to controller input, allowing you to play all Xbox Cloud Gaming games — even those that only support controller.')]),
+    h('span.kf-brand', [
+      icon('xbox', { size: 15 }),
+      h('span', 'Powered by Better xCloud'),
+      h('button.kf-link', { type: 'button', onclick: () => window.nexus.openExternal('https://better-xcloud.github.io/mouse-and-keyboard/') }, 'Learn more'),
+    ]),
+  ]);
+}
 
-/** Which controller buttons currently consume each key, for highlighting. */
-function keyUsage(mapping) {
-  const map = new Map();
-  for (const b of BUTTONS) {
-    const code = mapping[b.id]?.code;
-    if (!code) continue;
-    const list = map.get(code) || [];
-    list.push(b.label);
-    map.set(code, list);
-  }
-  return map;
+/**
+ * Which pad the mapping applies to. The translation layer always feeds one
+ * virtual Xbox pad, so this is informational — but players want to see whether
+ * their real controller was picked up before they start mapping.
+ */
+function devicePicker() {
+  const pads = navigator.getGamepads ? Array.from(navigator.getGamepads()).filter((p) => p && p.connected) : [];
+  const options = [
+    { value: 'virtual', label: 'Xbox Controller', sub: 'Virtual · always available' },
+    ...pads.map((p) => ({ value: `pad-${p.index}`, label: String(p.id || 'Controller').slice(0, 34), sub: 'Connected' })),
+  ];
+  const dd = dropdown({
+    label: 'Controller',
+    value: 'virtual',
+    options,
+    onPick: (v) => {
+      const pad = pads.find((p) => `pad-${p.index}` === v);
+      if (pad) toastInfo('Controller detected', `${String(pad.id).slice(0, 40)} — mappings apply to every pad`);
+      else toastInfo('Virtual Xbox controller', 'Games always receive controller input, real pad or not.');
+    },
+    className: 'dd-block',
+  });
+  return dd;
 }
 
 /**
@@ -516,99 +629,47 @@ const GROUP_TITLE = {
   rstick: 'Right stick movement',
 };
 
-const GLYPH = {
-  Backquote: '`', Backspace: '⌫', Tab: 'Tab', CapsLock: 'Caps', Enter: 'Enter',
-  ShiftLeft: 'Shift', ShiftRight: 'Shift', ControlLeft: 'Ctrl', ControlRight: 'Ctrl',
-  AltLeft: 'Alt', AltRight: 'Alt', MetaLeft: 'Win', MetaRight: 'Win', ContextMenu: 'Menu',
+/**
+ * The panels module owns presentation only; this is the single place that
+ * exposes live state and mutations to it. Keeping it explicit is what stops the
+ * two files from drifting into a tangle of shared module globals.
+ */
+const api = {
+  profiles: () => profiles(),
+  activeProfile: () => activeProfile(),
+  setProfileId: (id) => setProfileId(id),
+  mapping: () => sanitizeMapping(activeProfile()?.mapping),
+  mouseCfg: () => mouseCfg(),
+  stickCfg: () => stickCfg(),
+  cfgSliderRow,
+  cfgSwitchRow,
+  cfgPickRow,
+  curveOptions: CURVE_OPTIONS,
+  segmented,
+  watch,
+  padToBtn: PAD_INDEX_TO_BTN,
+  padLabel: (id) => buttonLabel(id),
+  isListening: () => listening,
+  mouseDrivesStick: () => mouseCfg().enabled !== false,
+  flash,
+  chooseTarget: (ctx, code, glyph) => chooseTargetForCode(ctx, code, glyph),
+  selectForRemap: (id) => { selectedId = id; listening = true; repaint(); },
+  registerConflictBadge: (el) => { conflictBadge = el; refreshConflictBadge(); },
+  createProfile: (ctx) => createProfile(ctx),
+  importProfile: (ctx) => importProfile(ctx),
+  go: (id) => { section = id; repaint(); },
+  runQuickAction: (action, ctx) => runQuickAction(action, ctx),
 };
 
-function kbmSection(ctx) {
-  const profile = activeProfile();
-  const mapping = sanitizeMapping(profile?.mapping);
-  const usage = keyUsage(mapping);
-
-  const kb = h('div.keyboard', KEY_ROWS.map((row) => h('div.kb-row', { style: { '--kw': String(row.w) } },
-    row.keys.map((glyph) => {
-      const code = glyph.length === 1
-        ? (/[a-z]/i.test(glyph) ? `Key${glyph.toUpperCase()}` : /[0-9]/.test(glyph) ? `Digit${glyph}` : glyph)
-        : (Object.keys(GLYPH).find((k) => GLYPH[k] === glyph) || glyph);
-      const used = usage.get(code);
-      return h(`button.kb-key${used ? '.bound' : ''}`, {
-        type: 'button',
-        title: used ? `${glyph} → ${used.join(', ')}` : `${glyph} — unassigned`,
-        onclick: () => {
-          if (used && used.length) {
-            // Jump straight to the controller input this key already drives.
-            const owner = BUTTONS.find((b) => mapping[b.id]?.code === code);
-            selectedId = owner ? owner.id : null;
-            listening = !!owner;
-            repaint();
-            return;
-          }
-          // Unbound key: ask what it should control instead of doing nothing.
-          chooseTargetForCode(ctx, code, glyph);
-        },
-      }, [h('span.kb-glyph', glyph), used ? h('span.kb-bind', used[0]) : null].filter(Boolean));
-    })
-  )));
-
-  const mouse = h('div.mouse-panel', [
-    h('h4', 'Mouse Settings'),
-    h('p.p-desc', 'Applies to the current profile and is what the game receives.'),
-    cfgSwitchRow('Mouse drives right stick', 'mouse', 'enabled', 'Turn off to use mouse buttons only.'),
-    cfgSliderRow('Mouse Sensitivity', 'mouse', 'sensitivity', 0.1, 4, 0.05, (v) => `${Math.round(v * 100)}%`),
-    cfgSliderRow('Horizontal Sensitivity', 'mouse', 'sensitivityX', 0, 3, 0.05, (v) => `${Math.round(v * 100)}%`),
-    cfgSliderRow('Vertical Sensitivity', 'mouse', 'sensitivityY', 0, 3, 0.05, (v) => `${Math.round(v * 100)}%`),
-    cfgSwitchRow('Invert Y Axis', 'mouse', 'invertY'),
-    cfgSliderRow('Mouse Deadzone', 'mouse', 'deadzone', 0, 0.4, 0.01, (v) => v.toFixed(2)),
-    cfgPickRow('Response Curve', 'mouse', 'responseCurve', CURVE_OPTIONS),
-    cfgSwitchRow('Stick Acceleration', 'mouse', 'acceleration', 'Input scales with stick deflection.'),
-    cfgSwitchRow('Smoothing', 'mouse', 'smoothingEnabled', 'Removes pointer jitter at the cost of a little lag.'),
-    cfgSliderRow('Smoothing Amount', 'mouse', 'smoothing', 0, 0.9, 0.05, (v) => `${Math.round(v * 100)}%`),
-  ]);
-
-  const advanced = h('div.kbm-advanced', [
-    h('div.row.compact', [
-      h('div.r-main', [
-        h('div.r-title', 'Mouse → Right Stick'),
-        h('div.r-desc', 'Mouse movement drives the virtual right stick using the sensitivity, curve and deadzone above.'),
-      ]),
-      h('span.status-chip.ok', [h('span.dot'), mouseCfg().enabled !== false ? 'Active' : 'Off']),
-    ]),
-    h('p.p-desc', 'These values are written into the Better xCloud virtual-controller preset that the stream window loads before each game starts, so they take effect on the next launch.'),
-    h('div.assign-hint', `Curve: ${mouseCfg().responseCurve || 'linear'} · deadzone ${Math.round((Number(mouseCfg().deadzone) || 0) * 100)}% · smoothing ${Math.round((Number(mouseCfg().smoothing) || 0) * 100)}%`),
-  ]);
-
-  let kbmTab = 'keyboard';
-  const tabsHost = h('div.kbm-tabs');
-  const bodyHost = h('div.kbm-body');
-  const renderTabs = () => {
-    clear(tabsHost);
-    tabsHost.appendChild(segmented([
-      { value: 'keyboard', label: 'Keyboard' },
-      { value: 'mouse', label: 'Mouse' },
-      { value: 'advanced', label: 'Advanced' },
-    ], kbmTab, (v) => { kbmTab = v; renderTabs(); renderBody(); }));
-  };
-  const renderBody = () => {
-    clear(bodyHost);
-    bodyHost.appendChild(kbmTab === 'keyboard' ? kb : kbmTab === 'mouse' ? mouse : advanced);
-  };
-  renderTabs();
-  renderBody();
-
-  return h('div.panel', [
-    h('h3', 'Keyboard & Mouse Mapping'),
-    h('p.p-desc', 'Green keys are bound to a controller input. Click one to remap.'),
-    tabsHost,
-    h('div.kbm-grid', [bodyHost, h('div.mapping-note', [
-      icon('info', { size: 15 }),
-      h('span', 'Keyboard and mouse input is converted to controller input, letting you play every Cloud Gaming title — including those that only accept a controller.'),
-    ])]),
-  ]);
+/** Quick Actions shared by the rail card, the ⋯ menu and the advanced section. */
+async function runQuickAction(action, ctx) {
+  if (action === 'reset-profile') return resetProfile(ctx);
+  if (action === 'reset-all') return resetAllControls(ctx);
+  if (action === 'conflicts') return showConflicts(ctx);
+  if (action === 'export') return exportProfile(activeProfile());
+  if (action === 'import') return importProfile(ctx);
+  return undefined;
 }
-
-
 
 // ---------- Section: Control profiles ----------
 function profilesSection(ctx) {
@@ -764,13 +825,7 @@ async function resetAllControls(ctx) {
 async function showConflicts(ctx) {
   const profile = activeProfile();
   const mapping = sanitizeMapping(profile?.mapping);
-  const seen = new Map();
-  for (const b of BUTTONS) {
-    const code = mapping[b.id]?.code;
-    if (!code) continue;
-    seen.set(code, [...(seen.get(code) || []), b.label]);
-  }
-  const dupes = [...seen.entries()].filter(([, labels]) => labels.length > 1);
+  const dupes = conflictList().map(([code, arr]) => [code, arr.map((b) => b.label)]);
   await openModal({
     title: dupes.length ? 'Conflict check' : 'No conflicts',
     body: dupes.length
@@ -891,6 +946,7 @@ function devicesSection(ctx) {
       h('div.r-main', [h('div.r-title', 'Keyboard & Mouse emulation'), h('div.r-desc', t('kbm_section_desc', { key: settings.get('input.kbmToggleKey', 'F8') }))]),
       switchControl('input.kbmEnabled', settings.get('input.kbmEnabled'), () => {}),
     ]),
+    testPanel(ctx),
   ]);
 }
 
@@ -1129,7 +1185,7 @@ export function createView(ctx) {
 
         let body;
         switch (section) {
-          case 'kbm': body = kbmSection(localCtx); break;
+          case 'kbm': body = kbmPanel(localCtx, api); break;
           case 'profiles': body = profilesSection(localCtx); break;
           case 'pergame': body = perGameSection(localCtx); break;
           case 'aim': body = aimSection(localCtx); break;
@@ -1142,6 +1198,7 @@ export function createView(ctx) {
 
         if (section === 'controller' && diagram) {
           requestAnimationFrame(() => diagram.layout?.());
+          refreshConflictBadge();
         }
       };
 

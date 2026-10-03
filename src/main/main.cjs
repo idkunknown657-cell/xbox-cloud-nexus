@@ -21,6 +21,7 @@ const { Catalog, LIST_IDS } = require('./catalog.cjs');
 const { WindowManager } = require('./windows.cjs');
 const { buildStreamBundle } = require('./stream-bridge.cjs');
 const { readBxScript, BXCLOUD_VERSION } = require('./bxcloud.cjs');
+const { readAccount, AUTH_PROBE_MS } = require('./xbox-account.cjs');
 
 // ---------- Single instance ----------
 const gotLock = app.requestSingleInstanceLock();
@@ -83,6 +84,8 @@ log.enableDebug(isDev || isSmoke);
 
 // Bundles awaiting pickup by a stream window's preload (sync IPC).
 const pendingStreamBundles = new Map();
+// Per-session metadata for running streams (ad-supported flag, title…).
+const streamMeta = new Map();
 
 const userDataDir = path.join(app.getPath('userData'));
 const settingsPath = path.join(userDataDir, 'settings.json');
@@ -98,8 +101,17 @@ if (store.get('performance.hwAccel') === false) {
 // ---------- Market/locale ----------
 function marketInfo() {
   const locale = store.get('cloud.preferredLocale') || 'en-US';
-  const [lang, region] = locale.split('-');
-  return { locale, market: (region || 'US').toUpperCase(), language: locale.toLowerCase() };
+  // Splitting on "-" is not enough: es-419 yields a "419" market and zh-Hant-TW
+  // yields "Hant", both of which the catalogue answers with 404s — an empty
+  // library forever. Ask Intl for the real region subtag and validate it.
+  let market = '';
+  try {
+    const region = new Intl.Locale(locale).maximize().region || '';
+    if (/^[A-Za-z]{2}$/.test(region)) market = region.toUpperCase();
+  } catch { /* an unparseable locale is a fallback, not a failure */ }
+  // The catalogue wants exactly ll-CC, e.g. en-us. Anything else 400s.
+  const language = /^[a-z]{2,3}-[A-Za-z]{2}$/.test(locale) ? locale.toLowerCase() : 'en-US';
+  return { locale, market: market || 'US', language };
 }
 
 // ---------- Session: main window uses isolated session; stream windows get their own ----------
@@ -128,6 +140,21 @@ function registerIpc() {
       const isStream = wc.session === session.fromPartition('persist:stream');
       if (!isMain && !isNexusApp && !isStream) throw new Error('Forbidden');
       return { ok: true, result: await fn(...args) };
+    } catch (err) {
+      log.error('ipc', fn.name || 'anon', err.message);
+      return { ok: false, error: err.message || String(err) };
+    }
+  };
+
+  /** Same authorisation as wrap(), but the handler also receives the sender. */
+  const wrapSender = (fn) => async (event, ...args) => {
+    const wc = event.sender;
+    try {
+      const isMain = wc === winMgr?.mainWindow?.webContents;
+      const isNexusApp = String(wc.getURL() || '').startsWith('nexus://app/');
+      const isStream = wc.session === session.fromPartition('persist:stream');
+      if (!isMain && !isNexusApp && !isStream) throw new Error('Forbidden');
+      return { ok: true, result: await fn(wc, ...args) };
     } catch (err) {
       log.error('ipc', fn.name || 'anon', err.message);
       return { ok: false, error: err.message || String(err) };
@@ -178,6 +205,9 @@ ipcMain.handle('catalog:library', wrap(async () => {
     const profile = resolveProfileFor(settings, productId);
     const bundle = buildStreamBundle(settings, profile, path.join(__dirname, '..', '..'), log);
     if (productId) pendingStreamBundles.set(productId, bundle);
+    // Remember how this session is paid for: free-with-ads titles show an
+    // Xbox-served pre-roll before the stream, and the in-game panel explains it.
+    if (productId) streamMeta.set(productId, { adSupported: opts?.adSupported === true, title: opts?.title || '' });
     try {
       const res = await winMgr.launchGame({ ...opts, locale });
       if (productId) recordRecent(productId);
@@ -211,6 +241,58 @@ ipcMain.handle('catalog:library', wrap(async () => {
       return true;
     }
     throw new Error('URL not allowed');
+  }));
+
+  // ---- Account ----
+  ipcMain.handle('auth:status', wrap((arg) => authStatus({ probePage: arg?.probe === true })));
+  // The single entry point the whole UI uses to start signing in.
+  ipcMain.handle('auth:signIn', wrap(async () => {
+    const { locale } = marketInfo();
+    const res = await winMgr.openSignInWindow(locale);
+    // Bring the sign-in window in front of the launcher: a window that opens
+    // behind a maximized frameless window looks exactly like nothing happened.
+    try { winMgr.signInWindow?.show(); winMgr.signInWindow?.focus(); } catch { /* ignore */ }
+    return { ...(await authStatus({ probePage: true })), ...res, window: winMgr.signInWindowState() };
+  }));
+  ipcMain.handle('auth:signInUrl', wrap(() => {
+    const { locale } = marketInfo();
+    return winMgr.signInUrl(locale);
+  }));
+  ipcMain.handle('auth:windowState', wrap(() => winMgr.signInWindowState()));
+  ipcMain.handle('auth:closeWindow', wrap(() => { winMgr.closeSignInWindow(); return true; }));
+  // Fallback for locked-down networks: the official page in the user's browser.
+  ipcMain.handle('auth:openInBrowser', wrap(() => {
+    const { locale } = marketInfo();
+    return winMgr.openSignInInBrowser(locale);
+  }));
+  ipcMain.handle('auth:signOut', wrap(async () => {
+    const ses = session.fromPartition('persist:stream');
+    // Only the stream partition is cleared: that is where the Xbox session
+    // lives, so signing out cannot touch anything else on the machine.
+    await ses.clearStorageData({ storages: ['cookies', 'localstorage', 'indexdb', 'serviceworkers', 'cachestorage'] });
+    // The cache holds rendered Microsoft pages; leaving them behind makes a
+    // signed-out session look half-signed-in on the next attempt.
+    try { await ses.clearCache(); } catch { /* not fatal */ }
+    store.set('account.signedIn', false);
+    store.set('account.gamertag', '');
+    store.set('account.xuid', '');
+    store.set('account.avatarUrl', '');
+    store.set('account.sessionState', 'none');
+    store.set('account.plan', 'auto');
+    store.set('account.planSource', 'signedOut');
+    pushToLaunchers('auth:changed', { signedIn: false, gamertag: '', plan: 'auto', planSource: 'signedOut', sessionState: 'none' });
+    return { signedIn: false, gamertag: '', xuid: '', avatarUrl: '', plan: 'auto', planSource: 'signedOut', sessionState: 'none', planKnown: false };
+  }));
+  // The player can declare their tier once if the signed-in page cannot be read.
+  ipcMain.handle('auth:setPlan', wrap(async (plan) => {
+    const allowed = ['auto', 'ultimate', 'pc', 'console', 'core', 'standard', 'none'];
+    const value = String(plan || 'auto');
+    if (!allowed.includes(value)) throw new Error('Unknown plan');
+    store.set('account.plan', value);
+    store.set('account.planSource', value === 'auto' ? 'unknown' : 'manual');
+    const s = await authStatus({ probePage: value === 'auto' });
+    pushToLaunchers('auth:changed', s);
+    return s;
   }));
 
   // ---- Window controls (custom titlebar) ----
@@ -268,6 +350,70 @@ ipcMain.handle('catalog:library', wrap(async () => {
   ipcMain.handle('stream:setFullscreen', wrap((productId, on) => {
     if (!String(productId || '').match(/^[A-Z0-9]{6,12}$/i)) throw new Error('Invalid product id');
     return winMgr.setStreamFullscreen(productId, on);
+  }));
+
+  // ---- In-game panel (the Configure Controls overlay inside a stream window) ----
+  ipcMain.handle('stream:ui', wrapSender(async (wc, cmd) => {
+    const payload = cmd && typeof cmd === 'object' ? cmd : {};
+    // The game is identified from the sending renderer, never from the payload:
+    // a page cannot ask us to control somebody else's stream window.
+    const productId = winMgr.productIdForWebContents(wc);
+    const cloud = () => store.get('cloud', {}) || {};
+    const meta = () => streamMeta.get(productId) || {};
+    const state = () => ({
+      productId,
+      title: meta().title || '',
+      adSupported: meta().adSupported === true,
+      signedIn: store.get('account.signedIn', false) === true,
+      kbmEnabled: store.get('input.kbmEnabled', true) !== false,
+      resolution: cloud().targetResolution || 'auto',
+      frameCap: Number(cloud().frameCap) || 0,
+      invertY: (store.get('input.mouse', {}) || {}).invertY === true,
+      mouseSensitivity: Number((store.get('input.mouse', {}) || {}).sensitivity) || 1,
+    });
+    switch (payload.kind) {
+      case 'state':
+        return state();
+      case 'set-kbm': {
+        store.set('input.kbmEnabled', !!payload.value);
+        return state();
+      }
+      case 'set-sensitivity': {
+        store.set('input.mouse.sensitivity', Math.min(4, Math.max(0.1, Number(payload.value) || 1)));
+        return state();
+      }
+      case 'set-invert-y': {
+        store.set('input.mouse.invertY', !!payload.value);
+        return state();
+      }
+      case 'set-quality': {
+        const allowed = ['auto', '720p', '1080p', '1080p-hq'];
+        if (payload.resolution && allowed.includes(String(payload.resolution))) {
+          store.set('cloud.targetResolution', String(payload.resolution));
+        }
+        if (payload.frameCap != null) store.set('cloud.frameCap', Math.max(0, Math.min(120, Number(payload.frameCap) || 0)));
+        return { ...state(), needsRestart: true };
+      }
+      case 'restart':
+        winMgr.reloadStream(productId);
+        return state();
+      case 'fullscreen':
+        winMgr.setStreamFullscreen(productId, payload.value == null ? null : !!payload.value);
+        return state();
+      case 'open-controls':
+        // Bring the launcher forward on the remapper, scoped to this game.
+        if (winMgr.mainWindow && !winMgr.mainWindow.isDestroyed()) {
+          if (winMgr.mainWindow.isMinimized()) winMgr.mainWindow.restore();
+          winMgr.mainWindow.focus();
+          pushToRenderer('app:open-controls', { productId });
+        }
+        return state();
+      case 'close':
+        winMgr.closeStream(productId);
+        return { closed: true };
+      default:
+        return state();
+    }
   }));
 
   // ---- Stream bundle (preload asks for it synchronously at document-start) ----
@@ -335,6 +481,97 @@ function recordRecent(productId) {
   store.set('recentPlayed', next);
 }
 
+// ---------- Account / sign-in ----------
+//
+// The app never asks for Microsoft credentials itself. It opens the official
+// Xbox Cloud Gaming page in its own window (same session partition as the
+// games) and only *observes* the result: either the session holds an Xbox Live
+// auth cookie, or the official page stops offering a "Sign in" action.
+const AUTH_COOKIES = new Set(['XBXLive', 'XBXLiveSSO', 'RPSTAuth', 'xsts_uch', 'xbox_live_session']);
+// 'none' | 'ok' | 'expired' — set by readAccount() from the official records.
+let authTimer = null;
+
+async function authStatus({ probePage = false } = {}) {
+  let signedIn = store.get('account.signedIn', false) === true;
+  let gamertag = store.get('account.gamertag', '') || '';
+  let xuid = store.get('account.xuid', '') || '';
+  let avatarUrl = store.get('account.avatarUrl', '') || '';
+  let sessionState = store.get('account.sessionState', 'none') || 'none';
+  // 'auto' means "ask Microsoft's page"; anything else is the player's own
+  // declaration from Settings -> Account, which always wins.
+  let plan = store.get('account.plan', 'auto') || 'auto';
+  let planSource = store.get('account.planSource', '') || '';
+  let detected = '';
+  let page = null;
+
+  // The two official records, read directly from the session partition.
+  let cookies = [];
+  try {
+    cookies = await session.fromPartition('persist:stream').cookies.get({ domain: '.xbox.com' });
+  } catch { /* keep the remembered values */ }
+  if (probePage) {
+    try { page = await winMgr?.readAccountFromSignInPage?.(); } catch { /* page not ready */ }
+  }
+  const account = readAccount({ userInfo: page?.userInfo || null, cookies });
+  if (page?.pageSignedIn && !(page?.userInfo)) {
+    // Page says signed in but storage was unreachable: trust the page, keep
+    // whatever identity we already know.
+    signedIn = true;
+    sessionState = 'ok';
+    if (page?.pageGamertag) gamertag = page.pageGamertag;
+  } else if (cookies.length || page?.userInfo) {
+    signedIn = account.signedIn;
+    sessionState = account.state;
+    if (account.gamertag) gamertag = account.gamertag;
+    if (account.xuid) xuid = account.xuid;
+    if (account.avatarUrl) avatarUrl = account.avatarUrl;
+  }
+  if (page?.plan) detected = page.plan;
+  if (detected) {
+    plan = detected;
+    planSource = 'detected';
+  } else if (planSource === 'manual' || planSource === 'detected') {
+    // Keep what we already know until a readable page says otherwise.
+  } else {
+    // No readable page: never invent a plan, fall back to "no subscription".
+    plan = 'none';
+    planSource = signedIn ? 'unknown' : 'signedOut';
+  }
+  const changed = signedIn !== store.get('account.signedIn', false)
+    || gamertag !== (store.get('account.gamertag', '') || '')
+    || plan !== (store.get('account.plan', 'auto') || 'auto')
+    || planSource !== (store.get('account.planSource', '') || '')
+    || sessionState !== (store.get('account.sessionState', 'none') || 'none');
+  store.set('account.signedIn', signedIn);
+  store.set('account.gamertag', gamertag);
+  store.set('account.xuid', xuid);
+  store.set('account.avatarUrl', avatarUrl);
+  store.set('account.sessionState', sessionState);
+  store.set('account.plan', plan);
+  store.set('account.planSource', planSource);
+  store.set('account.checkedAt', Date.now());
+  if (changed) pushToLaunchers('auth:changed', { signedIn, gamertag, plan, planSource, sessionState });
+  return {
+    signedIn,
+    gamertag,
+    xuid,
+    avatarUrl,
+    sessionState,
+    plan,
+    planSource,
+    planKnown: signedIn && planSource === 'detected',
+    onLoginPage: page?.onLogin === true,
+    checkedAt: store.get('account.checkedAt'),
+    probeMs: AUTH_PROBE_MS,
+  };
+}
+
+/** Called whenever the sign-in window moves to another page. */
+function onAuthProgress() {
+  clearTimeout(authTimer);
+  authTimer = setTimeout(() => { authStatus({ probePage: true }).catch(() => {}); }, 900);
+}
+
 // ---------- Lifecycle ----------
 app.whenReady().then(() => {
   log.info('app', `Xbox Cloud Nexus v${app.getVersion()} starting`, { hwAccel: store.get('performance.hwAccel') });
@@ -350,7 +587,11 @@ app.whenReady().then(() => {
       }
     },
     getStreamBundle: (productId) => pendingStreamBundles.get(productId) || null,
+    onAuthProgress,
   });
+
+  // A remembered sign-in is re-verified in the background on every boot.
+  authStatus().catch(() => {});
 
   winMgr.createMainWindow();
 

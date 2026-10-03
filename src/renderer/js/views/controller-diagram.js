@@ -68,8 +68,18 @@ const FACE_COLOR = { gamepadA: '#6cd850', gamepadB: '#ff5f57', gamepadX: '#4c9bf
 const FACE_LETTER = { gamepadA: 'A', gamepadB: 'B', gamepadX: 'X', gamepadY: 'Y' };
 const ARROW = { up: '↑', down: '↓', left: '←', right: '→' };
 
-/** The controller body. All shapes are drawn from the same geometry constants. */
+/**
+ * The controller body — Xbox Series X-style: separate bumper and trigger shapes
+ * sitting on the shoulder line, dished D-pad, concave sticks and the nexus
+ * button in the theme accent. Everything is drawn from the same geometry
+ * constants the hotspots use, so artwork and hit targets cannot drift apart.
+ */
 function bodySvg() {
+  const sticks = [G.ls, G.rs].map((s) => `
+  <circle cx="${s.x}" cy="${s.y}" r="${s.r}" fill="url(#cxWell)" stroke="var(--line-strong)" stroke-width="2"/>
+  <circle cx="${s.x}" cy="${s.y}" r="${s.r - 4.5}" fill="url(#cxGrip)" stroke="var(--line-strong)" stroke-width="1.4"/>
+  <circle cx="${s.x}" cy="${s.y}" r="${s.r - 11}" fill="var(--surface-1)" opacity="0.85"/>
+  <path d="M${s.x - 7} ${s.y - 7}a9.5 9.5 0 0 1 9-4" fill="none" stroke="var(--text-3)" stroke-width="1.6" stroke-linecap="round" opacity="0.55"/>`).join('');
   return `
 <svg viewBox="0 0 ${VB.w} ${VB.h}" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false">
   <defs>
@@ -77,23 +87,49 @@ function bodySvg() {
       <stop offset="0%" stop-color="var(--surface-3)"/>
       <stop offset="100%" stop-color="var(--surface-1)"/>
     </linearGradient>
-    <radialGradient id="cxGrip" cx="50%" cy="32%" r="72%">
+    <radialGradient id="cxGrip" cx="50%" cy="30%" r="72%">
       <stop offset="0%" stop-color="var(--surface-3)"/>
-      <stop offset="100%" stop-color="var(--surface-1)"/>
+      <stop offset="100%" stop-color="var(--surface-0)"/>
+    </radialGradient>
+    <radialGradient id="cxWell" cx="50%" cy="35%" r="70%">
+      <stop offset="0%" stop-color="var(--surface-0)"/>
+      <stop offset="100%" stop-color="var(--surface-2)"/>
     </radialGradient>
   </defs>
+
+  <!-- shadow keeps the pad feeling physical against the panel -->
+  <ellipse cx="200" cy="150" rx="150" ry="44" fill="#000" opacity="0.22"/>
+
+  <!-- triggers behind the shell -->
+  <path d="M40 30h30a6 6 0 0 1 6 6v20a6 6 0 0 1-6 6H40a6 6 0 0 1-6-6V36a6 6 0 0 1 6-6z"
+        fill="var(--surface-2)" stroke="var(--line-strong)" stroke-width="2"/>
+  <path d="M330 30h30a6 6 0 0 1 6 6v20a6 6 0 0 1-6 6h-30a6 6 0 0 1-6-6V36a6 6 0 0 1 6-6z"
+        fill="var(--surface-2)" stroke="var(--line-strong)" stroke-width="2"/>
+  <!-- bumpers -->
+  <path d="M30 84c0-12 10-20 26-20h10v14H56c-8 0-12 4-12 10v6H30z" fill="var(--surface-3)" stroke="var(--line-strong)" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M370 84c0-12-10-20-26-20h-10v14h10c8 0 12 4 12 10v6h14z" fill="var(--surface-3)" stroke="var(--line-strong)" stroke-width="2" stroke-linejoin="round"/>
+
+  <!-- shell -->
   <path fill="url(#cxBody)" stroke="var(--line-strong)" stroke-width="2.5"
-    d="M108 34c-34 2-52 22-62 56-9 30-16 62-8 84 7 19 25 24 42 15 14-8 25-20 36-28 11-8 25-11 42-11s31 3 42 11c11 8 22 20 36 28 17 9 35 4 42-15 8-22 1-54-8-84-10-34-28-54-62-56-14-2-24-2-30-2z"/>
-  ${[G.ls, G.rs].map((s) => `
-  <circle cx="${s.x}" cy="${s.y}" r="${s.r}" fill="url(#cxGrip)" stroke="var(--line-strong)" stroke-width="2"/>
-  <circle cx="${s.x}" cy="${s.y}" r="${s.r - 7}" fill="var(--surface-3)"/>
-  <circle cx="${s.x}" cy="${s.y}" r="8" fill="var(--surface-1)"/>`).join('')}
+    d="M106 40c-30 0-48 16-58 44-12 34-22 70-12 92 8 19 26 24 43 15 14-8 26-19 37-27 11-8 24-11 41-11s30 3 41 11c11 8 23 19 37 27 17 9 35 4 43-15 10-22 0-58-12-92-10-28-28-44-58-44-16 0-30 2-36 2s-20-2-36-2z"/>
+
+  ${sticks}
+
+  <!-- dished D-pad -->
+  <circle cx="${G.dpad.x}" cy="${G.dpad.y}" r="${G.dpad.arm + 9}" fill="var(--surface-0)" stroke="var(--line-strong)" stroke-width="1.6"/>
   <path fill="var(--surface-2)" stroke="var(--line-strong)" stroke-width="2" stroke-linejoin="round"
     d="M${G.dpad.x - 6} ${G.dpad.y - G.dpad.arm}h12v6h6v12h-6v6h-12v-6h-6v-12h6z"/>
-  <circle cx="${G.guide[0]}" cy="${G.guide[1]}" r="9" fill="none" stroke="var(--text-3)" stroke-width="2"/>
-  <path d="M${G.guide[0] - 4} ${G.guide[1]}h8M${G.guide[0]} ${G.guide[1] - 4}v8" stroke="var(--text-3)" stroke-width="2"/>
+
+  <!-- nexus button -->
+  <circle cx="${G.guide[0]}" cy="${G.guide[1]}" r="11" fill="var(--surface-0)" stroke="var(--accent)" stroke-width="2"/>
+  <path d="M${G.guide[0] - 4.6} ${G.guide[1] - 3.4}c1.8 2.2 3.1 4.1 4.6 6.6 1.5-2.5 2.8-4.4 4.6-6.6" fill="none" stroke="var(--accent)" stroke-width="1.6" stroke-linecap="round"/>
+  <path d="M${G.guide[0] - 4.2} ${G.guide[1] + 4.4}c1.4-1.9 2.9-3.3 4.2-4.5 1.3 1.2 2.8 2.6 4.2 4.5" fill="none" stroke="var(--accent)" stroke-width="1.6" stroke-linecap="round"/>
+
+  <!-- View / Menu -->
   <rect x="${G.view[0] - 6}" y="${G.view[1] - 6}" width="12" height="12" rx="2" fill="var(--surface-2)" stroke="var(--line-strong)" stroke-width="1.6"/>
-  <path d="M${G.start[0] - 5} ${G.start[1] - 4}h10M${G.start[0] - 5} ${G.start[1]}h10M${G.start[0] - 5} ${G.start[1] + 4}h10" stroke="var(--text-3)" stroke-width="2" stroke-linecap="round"/>
+  <path d="M${G.view[0] - 3} ${G.view[1] - 2}h6M${G.view[0] - 1.5} ${G.view[1] - 2}v4M${G.view[0] + 1.5} ${G.view[1] - 2}v4" stroke="var(--text-3)" stroke-width="1.3" stroke-linecap="round"/>
+  <rect x="${G.start[0] - 6}" y="${G.start[1] - 6}" width="12" height="12" rx="2" fill="var(--surface-2)" stroke="var(--line-strong)" stroke-width="1.6"/>
+  <path d="M${G.start[0] - 3.5} ${G.start[1] - 2.4}h7M${G.start[0] - 3.5} ${G.start[1]}h7M${G.start[0] - 3.5} ${G.start[1] + 2.4}h7" stroke="var(--text-3)" stroke-width="1.5" stroke-linecap="round"/>
 </svg>`;
 }
 
@@ -307,6 +343,17 @@ export function controllerDiagram(opts = {}) {
     selectedId = sel ?? null;
     listeningId = listen ?? null;
     applySelection();
+  };
+  /** Live input feedback (keyboard, mouse or a real pad) — never rebuilds. */
+  root.flash = (id, on) => {
+    const entry = labelNodes.get(id);
+    if (!entry) return;
+    entry.node.classList.toggle('live', !!on);
+    if (on) {
+      entry.node.classList.remove('pulse');
+      void entry.node.offsetWidth;
+      entry.node.classList.add('pulse');
+    }
   };
   root.layout = () => { sizeLeaders(); layout(); };
   root.has = (id) => labelNodes.has(id);

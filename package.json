@@ -9,8 +9,21 @@
   "private": true,
   "repository": {
     "type": "git",
-    "url": "https://example.com/xcloud-nexus"
+    "url": "https://github.com/idkunknown657-cell/xbox-cloud-nexus.git"
   },
+  "homepage": "https://github.com/idkunknown657-cell/xbox-cloud-nexus#readme",
+  "bugs": {
+    "url": "https://github.com/idkunknown657-cell/xbox-cloud-nexus/issues"
+  },
+  "keywords": [
+    "xbox",
+    "cloud-gaming",
+    "xcloud",
+    "keyboard-and-mouse",
+    "gamepad-emulation",
+    "electron",
+    "windows"
+  ],
   "build": {
     "appId": "com.xcloudnexus.app",
     "productName": "Xbox Cloud Nexus",
@@ -61,12 +74,17 @@
     "smoke": "electron . --smoke",
     "uitest": "electron src/main/uitest.cjs",
     "verify:bridge": "node scripts/check-stream-bridge.cjs",
+    "verify:entitlements": "node scripts/check-entitlements.cjs",
+    "verify:auth": "node scripts/check-auth.cjs",
+    "windowtest": "electron src/main/windowtest.cjs",
+    "verify": "node scripts/check-stream-bridge.cjs && node scripts/check-entitlements.cjs && node scripts/check-auth.cjs",
+    "screenshots": "electron scripts/screenshots.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "icons": "node scripts/generate-icons.mjs",
-    "dist": "npm run icons && electron-builder --win nsis portable",
-    "dist:installer": "npm run icons && electron-builder --win nsis",
-    "dist:portable": "npm run icons && electron-builder --win portable",
+    "dist": "npm run icons && node scripts/build-win.mjs",
+    "dist:portable": "npm run icons && node scripts/build-win.mjs --portable-only",
+    "dist:raw": "npm run icons && electron-builder --win nsis portable",
     "typecheck": "node --check src/main/main.cjs"
   },
   "devDependencies": {

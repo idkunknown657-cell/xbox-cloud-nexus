@@ -11,7 +11,7 @@
    ============================================================ */
 
 /* ---------- Layout: sub-nav + body ---------- */
-.controls-wrap { display: grid; grid-template-columns: 210px minmax(0, 1fr); gap: 22px; align-items: start; }
+.controls-wrap { display: grid; grid-template-columns: 206px minmax(0, 1fr); gap: 26px; align-items: start; }
 .controls-nav {
   position: sticky; top: 66px;
   display: flex; flex-direction: column; gap: 2px;
@@ -34,7 +34,11 @@
   border-color: color-mix(in srgb, var(--accent) 30%, transparent);
 }
 .controls-nav-item.active svg { transform: scale(1.06); }
-.controls-body { min-width: 0; display: flex; flex-direction: column; gap: 20px; }
+.controls-body {
+  min-width: 0; display: flex; flex-direction: column; gap: 26px;
+  /* Layout container: the columns below query this width, never the viewport. */
+  container-type: inline-size; container-name: cbody;
+}
 
 @media (max-width: 1000px) {
   .controls-wrap { grid-template-columns: 1fr; }
@@ -42,7 +46,7 @@
   .controls-nav-item { flex: 1 1 auto; }
 }
 
-.panel-flush { padding: 20px 22px; }
+.panel-flush { padding: 24px 26px; }
 .panel-head { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 16px; }
 .panel-head .p-desc { margin-bottom: 0; max-width: 62ch; }
 .panel-head > div { flex: 1; min-width: 0; }
@@ -56,8 +60,8 @@
 
 /* ---------- Profile header ---------- */
 .profile-header {
-  display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap;
-  padding: 14px 16px; margin-bottom: 18px;
+  display: flex; align-items: flex-end; gap: 14px; flex-wrap: wrap;
+  padding: 16px 18px; margin-bottom: 22px;
   border-radius: var(--radius); background: var(--surface-2); border: 1px solid var(--line);
 }
 .profile-header .field { display: flex; flex-direction: column; gap: 5px; min-width: 170px; }
@@ -69,34 +73,36 @@
 .mapping-grid { display: grid; grid-template-columns: 268px minmax(0, 1fr); gap: 20px; align-items: start; }
 @media (max-width: 1180px) { .mapping-grid { grid-template-columns: 1fr; } }
 
-.map-list-wrap { max-height: 520px; overflow-y: auto; padding-right: 4px; }
+.map-list-wrap { max-height: 600px; overflow-y: auto; padding-right: 8px; }
 .map-group {
   font-size: 10.5px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
-  color: var(--text-3); padding: 14px 8px 6px; position: sticky; top: 0;
+  color: var(--text-3); padding: 16px 10px 8px; position: sticky; top: 0;
   background: linear-gradient(var(--surface-1) 70%, transparent); z-index: 2;
 }
 .map-item {
-  display: flex; align-items: center; gap: 10px; width: 100%; text-align: left;
-  padding: 8px 10px; border-radius: 10px; border: 1px solid transparent;
+  display: flex; align-items: center; gap: 12px; width: 100%; text-align: left;
+  padding: 10px 12px; border-radius: 10px; border: 1px solid transparent;
   transition: background var(--dur-1) var(--ease), border-color var(--dur-1) var(--ease), transform var(--dur-1) var(--ease);
 }
 .map-item:hover { background: var(--surface-2); }
 .map-item:active { transform: scale(0.985); }
 .map-item.selected { background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 40%, transparent); }
 .map-badge {
-  width: 26px; height: 26px; border-radius: 8px; flex: 0 0 auto;
+  min-width: 26px; height: 26px; padding: 0 6px; border-radius: 8px; flex: 0 0 auto;
   display: grid; place-items: center; font-size: 10.5px; font-weight: 800;
+  letter-spacing: -0.2px; white-space: nowrap;
   background: var(--surface-3); color: var(--text-2); border: 1px solid var(--line-strong);
 }
+.map-item.wide-badge .map-badge { min-width: 42px; font-size: 10px; }
 .map-badge.fb-a { background: color-mix(in srgb, #6cd850 22%, var(--surface-2)); color: #8fe36b; }
 .map-badge.fb-b { background: color-mix(in srgb, #ff5f57 20%, var(--surface-2)); color: #ff8b85; }
 .map-badge.fb-x { background: color-mix(in srgb, #4c9bff 20%, var(--surface-2)); color: #7fb6ff; }
 .map-badge.fb-y { background: color-mix(in srgb, #f5d020 20%, var(--surface-2)); color: #ffdf6b; }
-.map-name { flex: 1; font-size: 13.5px; font-weight: 600; min-width: 0; }
+.map-name { flex: 1; font-size: 13.5px; font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .map-key {
   font-size: 12px; font-weight: 700; color: var(--accent);
   background: var(--accent-soft); border: 1px solid color-mix(in srgb, var(--accent) 24%, transparent);
-  padding: 3px 9px; border-radius: 7px; white-space: nowrap;
+  padding: 4px 10px; border-radius: 7px; white-space: nowrap;
   transition: color var(--dur-1) var(--ease), background var(--dur-1) var(--ease);
 }
 .map-key.unset { color: var(--text-3); background: var(--surface-2); border-color: var(--line); font-weight: 500; }
@@ -113,10 +119,11 @@
   display: grid;
   /* The artwork wins the space: the callout columns are fixed so a narrow panel
      shrinks the labels, never the controller itself. */
-  grid-template-columns: 106px minmax(300px, 1fr) 106px;
+  grid-template-columns: 98px minmax(268px, 1fr) 98px;
   grid-template-areas: "left stage right";
   align-items: center;
   gap: 12px;
+  max-width: none;
 }
 .cx-col { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
 .cx-col-left { grid-area: left; align-items: flex-end; }
@@ -270,7 +277,7 @@ body.perf-noanim .dd-menu { transition: none; opacity: 1; transform: none; }
 .row.compact .r-title { font-size: 13.5px; }
 
 /* ---------- Keyboard & Mouse ---------- */
-.kbm-tabs { margin-bottom: 16px; }
+.kbm-tabs { margin-bottom: 18px; }
 .kbm-grid { display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 20px; align-items: start; }
 @media (max-width: 980px) { .kbm-grid { grid-template-columns: 1fr; } }
 .mapping-note {
@@ -282,11 +289,13 @@ body.perf-noanim .dd-menu { transition: none; opacity: 1; transform: none; }
 .mapping-note svg { color: var(--accent); flex: 0 0 auto; margin-top: 1px; }
 
 .keyboard { display: flex; flex-direction: column; gap: 5px; }
-.kb-row { display: flex; gap: 5px; justify-content: center; }
+.kb-row { display: flex; gap: 5px; justify-content: center; flex-wrap: nowrap; }
 .kb-key {
-  flex: var(--kw, 1) 1 0; min-width: 0;
+  /* A hard floor stops 14 keys collapsing into unreadable slivers when the
+     column is narrow: the panel scrolls sideways instead. */
+  flex: var(--kw, 1) 1 0; min-width: 26px;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
-  height: 38px; padding: 2px 4px; border-radius: 7px;
+  height: 44px; padding: 3px 4px; border-radius: 7px;
   background: var(--surface-2); border: 1px solid var(--line-strong);
   font-size: 10.5px; font-weight: 700; color: var(--text-3);
   transition: transform var(--dur-1) var(--ease), background var(--dur-1) var(--ease),
@@ -295,13 +304,14 @@ body.perf-noanim .dd-menu { transition: none; opacity: 1; transform: none; }
 .kb-key:hover { border-color: var(--accent-dim); color: var(--text-2); transform: translateY(-1px); }
 .kb-key:active { transform: translateY(0) scale(0.97); }
 .kb-key.bound { background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 30%, transparent); color: var(--text-2); }
-.kb-glyph { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.kb-key { overflow: hidden; }
+.kb-glyph { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; font-size: 10px; line-height: 1.15; }
 .kb-bind { font-size: 9px; font-weight: 800; color: var(--accent); letter-spacing: 0.3px; }
 
 .mouse-panel h4 { font-size: 13.5px; font-weight: 700; margin-bottom: 8px; }
 .mouse-panel .p-desc { margin-bottom: 10px; }
 .assign-hint {
-  margin-top: 4px; padding: 9px 12px; border-radius: 8px;
+  margin-top: 10px; padding: 12px 14px; border-radius: 9px;
   background: var(--surface-2); border: 1px solid var(--line);
   font-size: 12.5px; color: var(--text-3); font-variant-numeric: tabular-nums;
 }
@@ -399,6 +409,24 @@ body.perf-noanim .dd-menu { transition: none; opacity: 1; transform: none; }
   padding: 8px 10px; border-radius: 9px;
 }
 .lp-row:hover { background: var(--surface-2); }
+.lp-adrow {
+  display: flex; gap: 10px; align-items: flex-start;
+  padding: 11px 14px; border-radius: var(--radius);
+  font-size: 12.5px; line-height: 1.55; color: #ffd166;
+  background: rgba(255, 209, 102, 0.08); border: 1px solid rgba(255, 209, 102, 0.26);
+}
+.lp-adrow > svg { flex: 0 0 auto; margin-top: 2px; }
+/* Account access: what this Xbox account may do with the title. */
+.lp-access {
+  display: flex; gap: 11px; align-items: flex-start;
+  padding: 12px 14px; border-radius: var(--radius);
+  background: var(--surface-2); border: 1px solid var(--line);
+}
+.lp-access > svg { flex: 0 0 auto; margin-top: 2px; color: var(--accent); }
+.lp-access-title { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+.lp-access .r-desc { font-size: 12.5px; line-height: 1.5; }
+.lp-access.blocked { background: rgba(229, 72, 77, 0.07); border-color: rgba(229, 72, 77, 0.28); }
+.lp-access.blocked > svg, .lp-access.blocked .lp-access-title { color: #ff8f93; }
 .lp-row .slider-row { flex: 1; max-width: 230px; }
 .lp-row .dd { min-width: 132px; }
 .seg-lg button { gap: 7px; }

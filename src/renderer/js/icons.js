@@ -22,6 +22,9 @@ const P = {
   x: '<path d="M6 6l12 12M18 6 6 18"/>',
   alert: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v5.5"/><circle cx="12" cy="16.2" r="1" fill="currentColor" stroke="none"/>',
   info: '<circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.5"/><circle cx="12" cy="7.8" r="1" fill="currentColor" stroke="none"/>',
+  lock: '<rect x="4.5" y="10.5" width="15" height="9.5" rx="2.2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/>',
+  badge: '<circle cx="12" cy="9" r="4.2"/><path d="M6.2 19.5a5.8 5.8 0 0 1 11.6 0"/>',
+  ads: '<rect x="3.5" y="6" width="17" height="12" rx="2.2"/><path d="M10 9.5v5l4.5-2.5z"/>',
   chevronRight: '<path d="m9.5 5.5 6.5 6.5-6.5 6.5"/>',
   chevronLeft: '<path d="M14.5 5.5 8 12l6.5 6.5"/>',
   chevronDown: '<path d="m5.5 9.5 6.5 6.5 6.5-6.5"/>',
@@ -65,6 +68,8 @@ const P = {
   wand: '<path d="M4 20 15 9"/><path d="M17 3.5 17.8 6 20 6.8 17.8 7.6 17 10 16.2 7.6 14 6.8 16.2 6Z"/><path d="M8 4 8.6 6 10.5 6.6 8.6 7.2 8 9 7.4 7.2 5.5 6.6 7.4 6Z"/>',
   layers: '<path d="m12 3.5 8.5 4.5L12 12.5 3.5 8Z"/><path d="m3.5 12.5 8.5 4.5 8.5-4.5M3.5 16.5 12 21l8.5-4.5"/>',
   history: '<path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1"/><path d="M3.5 4.5V10H9"/><path d="M12 8v4.5l3 1.8"/>',
+  bolt: '<path d="M13 3 5 13h5.5L10 21l8-10h-5.5L13 3Z"/>',
+  xbox: '<circle cx="12" cy="12" r="9"/><path d="M8 8.2c1.6 1.9 2.8 3.6 4 5.8 1.2-2.2 2.4-3.9 4-5.8"/><path d="M8.2 17.6c1.2-1.7 2.5-3 3.8-4.1 1.3 1.1 2.6 2.4 3.8 4.1"/>',
 };
 
 /** Icons that read better filled than stroked. */

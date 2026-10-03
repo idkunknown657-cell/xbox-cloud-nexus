@@ -13,8 +13,16 @@ const EN = {
   quick_play: 'Quick play', configure_controls: 'Configure controls',
   featured: 'Featured', popular_on_cloud: 'Popular on Cloud', recently_added: 'Recently added',
   recently_played: 'Recently Played', free_with_ads: 'Play with Ads',
-  freeWithAds_sub: 'Stream these titles free — just watch a few ads',
+  freeWithAds_sub: 'Free to stream — Xbox plays a short ad in the game window before each session.',
   cloud_gaming: 'Cloud Gaming', game_pass: 'Game Pass',
+  // entitlements / access
+  not_included: 'Not included in your plan',
+  requires_subscription: 'Requires Game Pass',
+  included_with_plan: 'Included with your plan',
+  play_with_ads_cta: 'Play with Ads',
+  access_sign_in_first: 'Sign in to check access',
+  sign_in: 'Sign in',
+  my_plan: 'My subscription',
   kbm_supported: 'Keyboard & Mouse', controller: 'Controller',
   // library
   all_games: 'All Games', search_games: 'Search games…', sort_by: 'Sort',
@@ -26,6 +34,7 @@ const EN = {
   // details
   developer: 'Developer', publisher: 'Publisher', genres: 'Genres', rating: 'Rating',
   add_favorite: 'Add to favorites', remove_favorite: 'Remove from favorites',
+  account: 'Xbox account', signed_out: 'Not signed in',
   back: 'Back', hide_game: 'Hide game', show_game: 'Unhide game',
   available_cloud: 'Available on Cloud Gaming', play_with_ads_badge: 'Play with Ads',
   // settings sections
@@ -118,8 +127,16 @@ const HI = {
   quick_play: 'तुरंत खेलें', configure_controls: 'कंट्रोल कॉन्फ़िगर करें',
   featured: 'विशेष रुप से प्रदर्शित', popular_on_cloud: 'क्लाउड पर लोकप्रिय', recently_added: 'हाल ही में जोड़े गए',
   recently_played: 'हाल में खेले गए', free_with_ads: 'विज्ञापन के साथ मुफ़्त',
-  freeWithAds_sub: 'इन गेम्स को मुफ़्त स्ट्रीम करें — बस कुछ विज्ञापन देखें',
+  freeWithAds_sub: 'मुफ़्त स्ट्रीम — हर सेशन से पहले Xbox गेम विंडो में छोटा विज्ञापन चलाता है।',
   cloud_gaming: 'क्लाउड गेमिंग', game_pass: 'गेम पास',
+  // entitlements / access
+  not_included: 'आपकी योजना में शामिल नहीं',
+  requires_subscription: 'गेम पास आवश्यक',
+  included_with_plan: 'आपकी योजना में शामिल',
+  play_with_ads_cta: 'विज्ञापन के साथ खेलें',
+  access_sign_in_first: 'पहुँच जाँचने के लिए साइन इन करें',
+  sign_in: 'साइन इन',
+  my_plan: 'मेरी सदस्यता',
   kbm_supported: 'कीबोर्ड और माउस', controller: 'कंट्रोलर',
   all_games: 'सभी गेम', search_games: 'गेम खोजें…', sort_by: 'क्रम',
   sort_recent: 'हाल में खेले', sort_name: 'नाम A–Z', sort_popular: 'सबसे लोकप्रिय',

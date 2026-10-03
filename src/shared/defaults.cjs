@@ -145,6 +145,23 @@ module.exports = {
     gameProfiles: {},           // productId -> profileId
   },
 
+  // Microsoft account state. `signedIn` is only ever set by observing the
+  // official sign-in window — no credentials are stored by this app.
+  account: {
+    signedIn: false,
+    gamertag: '',
+    xuid: '',
+    avatarUrl: '',
+    // 'none' | 'ok' | 'expired', read from the official session records.
+    sessionState: 'none',
+    checkedAt: 0,
+    skippedSignIn: false,
+    // 'auto' = read it off Microsoft's signed-in page; anything else is the
+    // player's own declaration (Settings -> Account). Never guessed silently.
+    plan: 'auto',
+    planSource: '',
+  },
+
   favorites: [],
   hiddenGames: [],
   recentPlayed: [],

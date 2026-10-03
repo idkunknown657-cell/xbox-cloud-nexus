@@ -1,0 +1,3626 @@
+{
+ "capturedAt": "2026-10-03T12:54:41.330Z",
+ "market": "US",
+ "lists": {
+  "freeWithAds": [
+   "BT5P2X999VH2",
+   "9NNFG8BQRCXL",
+   "9P4837D6TSFD",
+   "9PK8PHLCQDF6",
+   "9N0QWXC09MPT",
+   "9P22THR57FV7",
+   "9N8PMW7QMD3D",
+   "9PMFDKG5F9R7"
+  ],
+  "freeToPlay": [
+   "BT5P2X999VH2",
+   "9NNFG8BQRCXL",
+   "9P4837D6TSFD",
+   "9PK8PHLCQDF6",
+   "9N0QWXC09MPT",
+   "9P22THR57FV7",
+   "9N8PMW7QMD3D",
+   "9PMFDKG5F9R7"
+  ],
+  "popular": [
+   "BT5P2X999VH2",
+   "9N3D82TFF6C4",
+   "9N8PMW7QMD3D",
+   "9NVD16NP4J8T",
+   "9NLKS78C4F3Z",
+   "9P3PT7PQJD0M",
+   "9PJ6FV3130QZ",
+   "9P402RWR63H4"
+  ]
+ },
+ "products": [
+  {
+   "id": "BT5P2X999VH2",
+   "payload": {
+    "ProductId": "BT5P2X999VH2",
+    "LocalizedProperties": [
+     {
+      "ProductTitle": "Fortnite",
+      "EligibilityProperties": {
+       "Remediations": [
+        {
+         "RemediationId": "9Q2FPGL45CQN",
+         "Description": "With Game Pass Ultimate, you can play more great games anytime."
+        }
+       ],
+       "Affirmations": [
+        {
+         "AffirmationId": "9ZX560BHW79V",
+         "AffirmationProductId": "CFQ7TTC0KHS0",
+         "Description": "with your Game Pass Ultimate membership"
+        }
+       ]
+      }
+     }
+    ],
+    "DisplaySkuAvailabilities": [
+     {
+      "Availabilities": [
+       {
+        "Actions": [
+         "Details",
+         "Fulfill",
+         "Purchase",
+         "Browse",
+         "Curate",
+         "Redeem"
+        ]
+       },
+       {
+        "Actions": [
+         "Details",
+         "Purchase",
+         "Curate"
+        ]
+       },
+       {
+        "Actions": [
+         "License",
+         "Browse",
+         "Details"
+        ],
+        "LicensingData": {
+         "SatisfyingEntitlementKeys": [
+          {
+           "EntitlementKeys": [
+            "big:9N4W6K1FVRTT:0017"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9N4W6K1FVRTT:0010"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:BT5P2X999VH2:0001"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:BT5P2X999VH2:0003"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "wes:App:bf5fbf34-d1c7-47d8-8682-40b3850e354c:Full"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "wes:App:f51d8aaf-ab77-4504-8063-df2e75da2e8f:Full"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "xbx:GameV2:cb6fbdda-c872-476d-80bc-5c3d6cd5e6ea:Full"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "xbx:GameV2:cb6fbdda-c872-476d-80bc-5c3d6cd5e6ea:Presale"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:BT5P2X999VH2:0001"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:BT5P2X999VH2:0003"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          }
+         ]
+        }
+       },
+       {
+        "Actions": [
+         "License",
+         "Browse",
+         "Details"
+        ],
+        "LicensingData": {
+         "SatisfyingEntitlementKeys": [
+          {
+           "EntitlementKeys": [
+            "big:9NHFDZRD753R:0017"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9NHFDZRD753R:0010"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:BT5P2X999VH2:0001"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:BT5P2X999VH2:0003"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "wes:App:bf5fbf34-d1c7-47d8-8682-40b3850e354c:Full"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "wes:App:f51d8aaf-ab77-4504-8063-df2e75da2e8f:Full"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "xbx:GameV2:cb6fbdda-c872-476d-80bc-5c3d6cd5e6ea:Full"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "xbx:GameV2:cb6fbdda-c872-476d-80bc-5c3d6cd5e6ea:Presale"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:BT5P2X999VH2:0001"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:BT5P2X999VH2:0003"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          }
+         ]
+        }
+       },
+       {
+        "Actions": [
+         "License",
+         "Browse",
+         "Details"
+        ],
+        "LicensingData": {
+         "SatisfyingEntitlementKeys": [
+          {
+           "EntitlementKeys": [
+            "big:9NTWMW2L2B3D:0017"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9NTWMW2L2B3D:0010"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:BT5P2X999VH2:0001"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:BT5P2X999VH2:0003"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "wes:App:bf5fbf34-d1c7-47d8-8682-40b3850e354c:Full"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "wes:App:f51d8aaf-ab77-4504-8063-df2e75da2e8f:Full"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "xbx:GameV2:cb6fbdda-c872-476d-80bc-5c3d6cd5e6ea:Full"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "xbx:GameV2:cb6fbdda-c872-476d-80bc-5c3d6cd5e6ea:Presale"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:BT5P2X999VH2:0001"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:BT5P2X999VH2:0003"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          }
+         ]
+        }
+       },
+       {
+        "Actions": [
+         "License",
+         "Browse",
+         "Details"
+        ],
+        "LicensingData": {
+         "SatisfyingEntitlementKeys": [
+          {
+           "EntitlementKeys": [
+            "big:9PC5KKHSMCT5:0017"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9PC5KKHSMCT5:0010"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:BT5P2X999VH2:0001"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:BT5P2X999VH2:0003"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "wes:App:bf5fbf34-d1c7-47d8-8682-40b3850e354c:Full"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "wes:App:f51d8aaf-ab77-4504-8063-df2e75da2e8f:Full"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "xbx:GameV2:cb6fbdda-c872-476d-80bc-5c3d6cd5e6ea:Full"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "xbx:GameV2:cb6fbdda-c872-476d-80bc-5c3d6cd5e6ea:Presale"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:BT5P2X999VH2:0001"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:BT5P2X999VH2:0003"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          }
+         ]
+        }
+       }
+      ]
+     }
+    ],
+    "MarketProperties": [
+     {}
+    ]
+   }
+  },
+  {
+   "id": "9NNFG8BQRCXL",
+   "payload": {
+    "ProductId": "9NNFG8BQRCXL",
+    "LocalizedProperties": [
+     {
+      "ProductTitle": "Call of Duty®: Warzone™",
+      "EligibilityProperties": {
+       "Remediations": [
+        {
+         "RemediationId": "9XJQ81QG67NT",
+         "Description": "Get Xbox Game Pass Premium today to take advantage of a catalog of hundreds of high-quality games, online console multiplayer, and exclusive deals."
+        },
+        {
+         "RemediationId": "9ZNPVF4DTWVC",
+         "Description": "With Game Pass, you can play more great games anytime."
+        },
+        {
+         "RemediationId": "9Q2FPGL45CQN",
+         "Description": "With Game Pass Ultimate, you can play more great games anytime."
+        }
+       ],
+       "Affirmations": [
+        {
+         "AffirmationId": "9VCZJGNMBH6B",
+         "AffirmationProductId": "CFQ7TTC0P85B",
+         "Description": "with your Xbox Game Pass Premium membership."
+        },
+        {
+         "AffirmationId": "B1FFW2F7JKV0",
+         "AffirmationProductId": "CFQ7TTC0KGQ8",
+         "Description": "with your Game Pass membership"
+        },
+        {
+         "AffirmationId": "9ZX560BHW79V",
+         "AffirmationProductId": "CFQ7TTC0KHS0",
+         "Description": "with your Game Pass Ultimate membership"
+        }
+       ]
+      }
+     }
+    ],
+    "DisplaySkuAvailabilities": [
+     {
+      "Availabilities": [
+       {
+        "Actions": [
+         "Details",
+         "Purchase",
+         "Browse",
+         "Curate",
+         "Redeem"
+        ]
+       },
+       {
+        "Actions": [
+         "Details",
+         "Purchase",
+         "Curate"
+        ]
+       },
+       {
+        "Actions": [
+         "Details",
+         "Purchase",
+         "Curate"
+        ]
+       },
+       {
+        "Actions": [
+         "Details",
+         "Purchase",
+         "Curate"
+        ]
+       },
+       {
+        "Actions": [
+         "Details"
+        ]
+       },
+       {
+        "Actions": [
+         "License",
+         "Browse",
+         "Details"
+        ],
+        "LicensingData": {
+         "SatisfyingEntitlementKeys": [
+          {
+           "EntitlementKeys": [
+            "big:9NNFG8BQRCXL:0010"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9NNFG8BQRCXL:0017"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9NNFG8BQRCXL:0001"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9NNFG8BQRCXL:0002"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:BS01V88G34DD:0001"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:BS01V88G34DD:0003"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          }
+         ]
+        }
+       }
+      ]
+     }
+    ],
+    "MarketProperties": [
+     {}
+    ]
+   }
+  },
+  {
+   "id": "9P4837D6TSFD",
+   "payload": {
+    "ProductId": "9P4837D6TSFD",
+    "LocalizedProperties": [
+     {
+      "ProductTitle": "Tom Clancy's Rainbow Six® Siege - Free Access",
+      "EligibilityProperties": {
+       "Remediations": [],
+       "Affirmations": []
+      }
+     }
+    ],
+    "DisplaySkuAvailabilities": [
+     {
+      "Availabilities": [
+       {
+        "Actions": [
+         "Details",
+         "Purchase",
+         "Browse",
+         "Curate",
+         "Redeem"
+        ]
+       },
+       {
+        "Actions": [
+         "Details"
+        ]
+       },
+       {
+        "Actions": [
+         "License",
+         "Browse",
+         "Details"
+        ],
+        "LicensingData": {
+         "SatisfyingEntitlementKeys": [
+          {
+           "EntitlementKeys": [
+            "big:9P4837D6TSFD:0010"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9P4837D6TSFD:0017"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9P4837D6TSFD:0001"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9P4837D6TSFD:0002"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:C2NRW5RV0H05:0001"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:C2NRW5RV0H05:0003"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          }
+         ]
+        }
+       }
+      ]
+     }
+    ],
+    "MarketProperties": [
+     {}
+    ]
+   }
+  },
+  {
+   "id": "9PK8PHLCQDF6",
+   "payload": {
+    "ProductId": "9PK8PHLCQDF6",
+    "LocalizedProperties": [
+     {
+      "ProductTitle": "Aniimo",
+      "EligibilityProperties": {
+       "Remediations": [
+        {
+         "RemediationId": "9T74G6JX65VX",
+         "Description": "Get Xbox Game Pass Premium today to take advantage of a catalog of hundreds of high-quality games, online console multiplayer, and exclusive deals."
+        },
+        {
+         "RemediationId": "9ZNPVF4DTWVC",
+         "Description": "With Game Pass, you can play more great games anytime."
+        },
+        {
+         "RemediationId": "9Q2FPGL45CQN",
+         "Description": "With Game Pass Ultimate, you can play more great games anytime."
+        }
+       ],
+       "Affirmations": [
+        {
+         "AffirmationId": "9ZXVPLS5B7JB",
+         "AffirmationProductId": "CFQ7TTC0P85B",
+         "Description": "with your Xbox Game Pass Premium membership."
+        },
+        {
+         "AffirmationId": "B1FFW2F7JKV0",
+         "AffirmationProductId": "CFQ7TTC0KGQ8",
+         "Description": "with your Game Pass membership"
+        },
+        {
+         "AffirmationId": "9ZX560BHW79V",
+         "AffirmationProductId": "CFQ7TTC0KHS0",
+         "Description": "with your Game Pass Ultimate membership"
+        }
+       ]
+      }
+     }
+    ],
+    "DisplaySkuAvailabilities": [
+     {
+      "Availabilities": [
+       {
+        "Actions": [
+         "Details",
+         "Fulfill",
+         "Purchase",
+         "Browse",
+         "Curate",
+         "Redeem"
+        ]
+       },
+       {
+        "Actions": [
+         "Details",
+         "Purchase",
+         "Curate"
+        ]
+       },
+       {
+        "Actions": [
+         "Details",
+         "Purchase",
+         "Curate"
+        ]
+       },
+       {
+        "Actions": [
+         "Details",
+         "Purchase",
+         "Curate"
+        ]
+       },
+       {
+        "Actions": [
+         "License",
+         "Browse",
+         "Details"
+        ],
+        "LicensingData": {
+         "SatisfyingEntitlementKeys": [
+          {
+           "EntitlementKeys": [
+            "big:9PK8PHLCQDF6:0010"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9PK8PHLCQDF6:0017"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "wes:App:b85b6eb0-9a27-476e-a543-7af9b676c597:Full"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "wes:App:8f3820f0-92ef-4f63-b1e5-02aeb2d1fbe0:Full"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9PK8PHLCQDF6:0001"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9PK8PHLCQDF6:0002"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:C3G70LG45GB7:0001"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:C3G70LG45GB7:0003"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          }
+         ]
+        }
+       },
+       {
+        "Actions": [
+         "License",
+         "Browse",
+         "Details"
+        ],
+        "LicensingData": {
+         "SatisfyingEntitlementKeys": [
+          {
+           "EntitlementKeys": [
+            "big:CFQ7TTC0KHS0:0004"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9PK8PHLCQDF6:0010"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9PK8PHLCQDF6:0017"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "wes:App:b85b6eb0-9a27-476e-a543-7af9b676c597:Full"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "wes:App:8f3820f0-92ef-4f63-b1e5-02aeb2d1fbe0:Full"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9PK8PHLCQDF6:0001"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9PK8PHLCQDF6:0002"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:C3G70LG45GB7:0001"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:C3G70LG45GB7:0003"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          }
+         ]
+        }
+       }
+      ]
+     }
+    ],
+    "MarketProperties": [
+     {}
+    ]
+   }
+  },
+  {
+   "id": "9N0QWXC09MPT",
+   "payload": {
+    "ProductId": "9N0QWXC09MPT",
+    "LocalizedProperties": [
+     {
+      "ProductTitle": "Once Human",
+      "EligibilityProperties": {
+       "Remediations": [
+        {
+         "RemediationId": "9QW8RQSK7J0C",
+         "Description": "Get Xbox Game Pass Premium today to take advantage of a catalog of hundreds of high-quality games, online console multiplayer, and exclusive deals."
+        },
+        {
+         "RemediationId": "9ZNPVF4DTWVC",
+         "Description": "With Game Pass, you can play more great games anytime."
+        },
+        {
+         "RemediationId": "9Q2FPGL45CQN",
+         "Description": "With Game Pass Ultimate, you can play more great games anytime."
+        }
+       ],
+       "Affirmations": [
+        {
+         "AffirmationId": "B4NM5264GK3F",
+         "AffirmationProductId": "CFQ7TTC0P85B",
+         "Description": "with your Xbox Game Pass Premium membership."
+        },
+        {
+         "AffirmationId": "B1FFW2F7JKV0",
+         "AffirmationProductId": "CFQ7TTC0KGQ8",
+         "Description": "with your Game Pass membership"
+        },
+        {
+         "AffirmationId": "9ZX560BHW79V",
+         "AffirmationProductId": "CFQ7TTC0KHS0",
+         "Description": "with your Game Pass Ultimate membership"
+        }
+       ]
+      }
+     }
+    ],
+    "DisplaySkuAvailabilities": [
+     {
+      "Availabilities": [
+       {
+        "Actions": [
+         "Details",
+         "Fulfill",
+         "Purchase",
+         "Browse",
+         "Curate",
+         "Redeem"
+        ]
+       },
+       {
+        "Actions": [
+         "Details",
+         "Purchase",
+         "Curate"
+        ]
+       },
+       {
+        "Actions": [
+         "Details",
+         "Purchase",
+         "Curate"
+        ]
+       },
+       {
+        "Actions": [
+         "Details",
+         "Purchase",
+         "Curate"
+        ]
+       },
+       {
+        "Actions": [
+         "License",
+         "Browse",
+         "Details"
+        ],
+        "LicensingData": {
+         "SatisfyingEntitlementKeys": [
+          {
+           "EntitlementKeys": [
+            "big:9N0QWXC09MPT:0010"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9N0QWXC09MPT:0017"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ],
+           "PreOrderReleaseDate": "2026-08-25T18:00:00.0000000Z"
+          },
+          {
+           "EntitlementKeys": [
+            "wes:App:116db97b-e398-48a7-82b4-fdd6c144329b:Full"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "wes:App:a6a4095e-afb0-4027-be17-b12f459f4559:Full"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9N0QWXC09MPT:0001"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9N0QWXC09MPT:0002"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:BS9G219KD93N:0001"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:BS9G219KD93N:0003"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ],
+           "PreOrderReleaseDate": "2026-08-25T18:00:00.0000000Z"
+          }
+         ]
+        }
+       },
+       {
+        "Actions": [
+         "License",
+         "Browse",
+         "Details"
+        ],
+        "LicensingData": {
+         "SatisfyingEntitlementKeys": [
+          {
+           "EntitlementKeys": [
+            "big:CFQ7TTC0KHS0:0004"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ],
+           "PreOrderReleaseDate": "2026-08-25T18:00:00.0000000Z"
+          },
+          {
+           "EntitlementKeys": [
+            "big:9N0QWXC09MPT:0010"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9N0QWXC09MPT:0017"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ],
+           "PreOrderReleaseDate": "2026-08-25T18:00:00.0000000Z"
+          },
+          {
+           "EntitlementKeys": [
+            "wes:App:116db97b-e398-48a7-82b4-fdd6c144329b:Full"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "wes:App:a6a4095e-afb0-4027-be17-b12f459f4559:Full"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9N0QWXC09MPT:0001"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9N0QWXC09MPT:0002"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:BS9G219KD93N:0001"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:BS9G219KD93N:0003"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ],
+           "PreOrderReleaseDate": "2026-08-25T18:00:00.0000000Z"
+          }
+         ]
+        }
+       }
+      ]
+     }
+    ],
+    "MarketProperties": [
+     {}
+    ]
+   }
+  },
+  {
+   "id": "9P22THR57FV7",
+   "payload": {
+    "ProductId": "9P22THR57FV7",
+    "LocalizedProperties": [
+     {
+      "ProductTitle": "Call of Duty®: Black Ops 6 - Launcher",
+      "EligibilityProperties": {
+       "Remediations": [
+        {
+         "RemediationId": "B0P28LVH86PM",
+         "Description": "Get Xbox Game Pass Premium today to take advantage of a catalog of hundreds of high-quality games, online console multiplayer, and exclusive deals."
+        },
+        {
+         "RemediationId": "9SJCZDHW896G",
+         "Description": "With Xbox Game Pass, you can play more great games anytime."
+        },
+        {
+         "RemediationId": "9ZNPVF4DTWVC",
+         "Description": "With Game Pass, you can play more great games anytime."
+        }
+       ],
+       "Affirmations": [
+        {
+         "AffirmationId": "B43TFMRFC82Z",
+         "AffirmationProductId": "CFQ7TTC0P85B",
+         "Description": "with your Xbox Game Pass Premium membership."
+        },
+        {
+         "AffirmationId": "9WNZS2ZC9L74",
+         "AffirmationProductId": "CFQ7TTC0K6L8",
+         "Description": "with your Xbox Game Pass membership"
+        },
+        {
+         "AffirmationId": "B1FFW2F7JKV0",
+         "AffirmationProductId": "CFQ7TTC0KGQ8",
+         "Description": "with your Game Pass membership"
+        }
+       ]
+      }
+     }
+    ],
+    "DisplaySkuAvailabilities": [
+     {
+      "Availabilities": [
+       {
+        "Actions": [
+         "Details",
+         "Fulfill",
+         "Purchase",
+         "Browse",
+         "Curate",
+         "Redeem"
+        ]
+       },
+       {
+        "Actions": [
+         "Details",
+         "Purchase",
+         "Curate"
+        ]
+       },
+       {
+        "Actions": [
+         "Details",
+         "Purchase",
+         "Curate"
+        ]
+       },
+       {
+        "Actions": [
+         "Details",
+         "Purchase",
+         "Curate"
+        ]
+       },
+       {
+        "Actions": [
+         "License",
+         "Browse",
+         "Details"
+        ],
+        "LicensingData": {
+         "SatisfyingEntitlementKeys": [
+          {
+           "EntitlementKeys": [
+            "big:9P22THR57FV7:0010"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "wes:App:224d2357-2305-4338-aba4-bb95b5e86656:Full"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "wes:App:422e14be-956f-44ec-b718-1d84928afa9d:Full"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9P22THR57FV7:0001"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9P22THR57FV7:0002"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:BP59R2W70877:0001"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:BP59R2W70877:0003"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          }
+         ]
+        }
+       },
+       {
+        "Actions": [
+         "License",
+         "Browse",
+         "Details"
+        ],
+        "LicensingData": {
+         "SatisfyingEntitlementKeys": [
+          {
+           "EntitlementKeys": [
+            "big:9MZ1RZTJTZKB:0017"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9MZ1RZTJTZKB:0010"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9P22THR57FV7:0010"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "wes:App:224d2357-2305-4338-aba4-bb95b5e86656:Full"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "wes:App:422e14be-956f-44ec-b718-1d84928afa9d:Full"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9P22THR57FV7:0001"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9P22THR57FV7:0002"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:BP59R2W70877:0001"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:BP59R2W70877:0003"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          }
+         ]
+        }
+       }
+      ]
+     }
+    ],
+    "MarketProperties": [
+     {}
+    ]
+   }
+  },
+  {
+   "id": "9N8PMW7QMD3D",
+   "payload": {
+    "ProductId": "9N8PMW7QMD3D",
+    "LocalizedProperties": [
+     {
+      "ProductTitle": "Marvel Rivals",
+      "EligibilityProperties": {
+       "Remediations": [],
+       "Affirmations": []
+      }
+     }
+    ],
+    "DisplaySkuAvailabilities": [
+     {
+      "Availabilities": [
+       {
+        "Actions": [
+         "Details",
+         "Fulfill",
+         "Purchase",
+         "Browse",
+         "Curate",
+         "Redeem"
+        ]
+       },
+       {
+        "Actions": [
+         "License",
+         "Browse",
+         "Details"
+        ],
+        "LicensingData": {
+         "SatisfyingEntitlementKeys": [
+          {
+           "EntitlementKeys": [
+            "big:9N8PMW7QMD3D:0010"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "wes:App:b86397bd-605d-4723-8fb6-e2a174a95de0:Full"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "wes:App:ed018564-4c43-4c1f-a673-b65629c8d5d0:Full"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9N8PMW7QMD3D:0001"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9N8PMW7QMD3D:0002"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:C3Z8MDLFK8JL:0001"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:C3Z8MDLFK8JL:0003"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          }
+         ]
+        }
+       },
+       {
+        "Actions": [
+         "License",
+         "Details"
+        ],
+        "LicensingData": {
+         "SatisfyingEntitlementKeys": [
+          {
+           "EntitlementKeys": [
+            "big:9N8PMW7QMD3D:0010"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "wes:App:b86397bd-605d-4723-8fb6-e2a174a95de0:Full"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "wes:App:ed018564-4c43-4c1f-a673-b65629c8d5d0:Full"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9N8PMW7QMD3D:0001"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9N8PMW7QMD3D:0002"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:C3Z8MDLFK8JL:0001"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:C3Z8MDLFK8JL:0003"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          }
+         ]
+        }
+       }
+      ]
+     }
+    ],
+    "MarketProperties": [
+     {}
+    ]
+   }
+  },
+  {
+   "id": "9PMFDKG5F9R7",
+   "payload": {
+    "ProductId": "9PMFDKG5F9R7",
+    "LocalizedProperties": [
+     {
+      "ProductTitle": "Call of Duty®: Modern Warfare® III",
+      "EligibilityProperties": {
+       "Remediations": [
+        {
+         "RemediationId": "9X8Q4XJRF6VS",
+         "Description": "Get Xbox Game Pass Premium today to take advantage of a catalog of hundreds of high-quality games, online console multiplayer, and exclusive deals."
+        },
+        {
+         "RemediationId": "9SJCZDHW896G",
+         "Description": "With Xbox Game Pass, you can play more great games anytime."
+        },
+        {
+         "RemediationId": "9ZNPVF4DTWVC",
+         "Description": "With Game Pass, you can play more great games anytime."
+        }
+       ],
+       "Affirmations": [
+        {
+         "AffirmationId": "9XLTVVC60270",
+         "AffirmationProductId": "CFQ7TTC0P85B",
+         "Description": "with your Xbox Game Pass Premium membership."
+        },
+        {
+         "AffirmationId": "9WNZS2ZC9L74",
+         "AffirmationProductId": "CFQ7TTC0K6L8",
+         "Description": "with your Xbox Game Pass membership"
+        },
+        {
+         "AffirmationId": "B1FFW2F7JKV0",
+         "AffirmationProductId": "CFQ7TTC0KGQ8",
+         "Description": "with your Game Pass membership"
+        }
+       ]
+      }
+     }
+    ],
+    "DisplaySkuAvailabilities": [
+     {
+      "Availabilities": [
+       {
+        "Actions": [
+         "Details",
+         "Fulfill",
+         "Purchase",
+         "Browse",
+         "Curate",
+         "Redeem"
+        ]
+       },
+       {
+        "Actions": [
+         "Details",
+         "Purchase",
+         "Curate"
+        ]
+       },
+       {
+        "Actions": [
+         "Details",
+         "Purchase",
+         "Curate"
+        ]
+       },
+       {
+        "Actions": [
+         "Details",
+         "Purchase",
+         "Curate"
+        ]
+       },
+       {
+        "Actions": [
+         "License",
+         "Browse",
+         "Details"
+        ],
+        "LicensingData": {
+         "SatisfyingEntitlementKeys": [
+          {
+           "EntitlementKeys": [
+            "big:9PMFDKG5F9R7:0010"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "wes:App:974c543b-e380-44b7-b1eb-c51a2a0a4c3d:Full"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "wes:App:5acfa9dd-d7f7-4101-8c4b-fb17252efc08:Full"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9PMFDKG5F9R7:0001"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9PMFDKG5F9R7:0002"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:C2VFVMDLMHJ8:0001"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:C2VFVMDLMHJ8:0003"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          }
+         ]
+        }
+       },
+       {
+        "Actions": [
+         "License",
+         "Browse",
+         "Details"
+        ],
+        "LicensingData": {
+         "SatisfyingEntitlementKeys": [
+          {
+           "EntitlementKeys": [
+            "big:9NDKFJ6XDX2M:0017"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9NDKFJ6XDX2M:0010"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9PMFDKG5F9R7:0010"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "wes:App:974c543b-e380-44b7-b1eb-c51a2a0a4c3d:Full"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "wes:App:5acfa9dd-d7f7-4101-8c4b-fb17252efc08:Full"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9PMFDKG5F9R7:0001"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9PMFDKG5F9R7:0002"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:C2VFVMDLMHJ8:0001"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:C2VFVMDLMHJ8:0003"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          }
+         ]
+        }
+       }
+      ]
+     }
+    ],
+    "MarketProperties": [
+     {}
+    ]
+   }
+  },
+  {
+   "id": "9N3D82TFF6C4",
+   "payload": {
+    "ProductId": "9N3D82TFF6C4",
+    "LocalizedProperties": [
+     {
+      "ProductTitle": "NBA 2K27",
+      "EligibilityProperties": {
+       "Remediations": [],
+       "Affirmations": []
+      }
+     }
+    ],
+    "DisplaySkuAvailabilities": [
+     {
+      "Availabilities": [
+       {
+        "Actions": [
+         "Details",
+         "Fulfill",
+         "Purchase",
+         "Browse",
+         "Curate",
+         "Redeem"
+        ]
+       },
+       {
+        "Actions": [
+         "Details",
+         "Fulfill",
+         "Browse",
+         "Curate",
+         "Gift"
+        ]
+       },
+       {
+        "Actions": [
+         "License",
+         "Browse",
+         "Details"
+        ],
+        "LicensingData": {
+         "SatisfyingEntitlementKeys": [
+          {
+           "EntitlementKeys": [
+            "big:9N3D82TFF6C4:0010"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9N3D82TFF6C4:0017"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "wes:App:0fc204c1-c250-47cf-8279-bb9de2682b56:Full"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "wes:App:27085542-c752-459a-a6d8-e761387a2927:Full"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9N3D82TFF6C4:0001"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9N3D82TFF6C4:0002"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:BVD8HP3HZW6W:0001"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:BVD8HP3HZW6W:0003"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          }
+         ]
+        }
+       },
+       {
+        "Actions": [
+         "License",
+         "Browse",
+         "Details"
+        ],
+        "LicensingData": {
+         "SatisfyingEntitlementKeys": [
+          {
+           "EntitlementKeys": [
+            "big:9MTX99PFKLWD:0017"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ],
+           "PreOrderReleaseDate": "2026-09-04T04:00:00.0000000Z"
+          },
+          {
+           "EntitlementKeys": [
+            "big:9MTX99PFKLWD:0010"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ],
+           "PreOrderReleaseDate": "2026-09-04T04:00:00.0000000Z"
+          },
+          {
+           "EntitlementKeys": [
+            "big:9N3D82TFF6C4:0010"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9N3D82TFF6C4:0017"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "wes:App:0fc204c1-c250-47cf-8279-bb9de2682b56:Full"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "wes:App:27085542-c752-459a-a6d8-e761387a2927:Full"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9N3D82TFF6C4:0001"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9N3D82TFF6C4:0002"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:BVD8HP3HZW6W:0001"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:BVD8HP3HZW6W:0003"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          }
+         ]
+        }
+       },
+       {
+        "Actions": [
+         "License",
+         "Browse",
+         "Details"
+        ],
+        "LicensingData": {
+         "SatisfyingEntitlementKeys": [
+          {
+           "EntitlementKeys": [
+            "big:9MT7881CVTGX:0017"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ],
+           "PreOrderReleaseDate": "2026-08-26T16:00:00.0000000Z"
+          },
+          {
+           "EntitlementKeys": [
+            "big:9MT7881CVTGX:0010"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ],
+           "PreOrderReleaseDate": "2026-08-26T16:00:00.0000000Z"
+          },
+          {
+           "EntitlementKeys": [
+            "big:9N3D82TFF6C4:0010"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9N3D82TFF6C4:0017"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "wes:App:0fc204c1-c250-47cf-8279-bb9de2682b56:Full"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "wes:App:27085542-c752-459a-a6d8-e761387a2927:Full"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9N3D82TFF6C4:0001"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9N3D82TFF6C4:0002"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:BVD8HP3HZW6W:0001"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:BVD8HP3HZW6W:0003"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          }
+         ]
+        }
+       },
+       {
+        "Actions": [
+         "License",
+         "Browse",
+         "Details"
+        ],
+        "LicensingData": {
+         "SatisfyingEntitlementKeys": [
+          {
+           "EntitlementKeys": [
+            "big:9N4WM7ZGQFV1:0017"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ],
+           "PreOrderReleaseDate": "2026-08-26T16:00:00.0000000Z"
+          },
+          {
+           "EntitlementKeys": [
+            "big:9N4WM7ZGQFV1:0010"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ],
+           "PreOrderReleaseDate": "2026-08-26T16:00:00.0000000Z"
+          },
+          {
+           "EntitlementKeys": [
+            "big:9N3D82TFF6C4:0010"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9N3D82TFF6C4:0017"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "wes:App:0fc204c1-c250-47cf-8279-bb9de2682b56:Full"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "wes:App:27085542-c752-459a-a6d8-e761387a2927:Full"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9N3D82TFF6C4:0001"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9N3D82TFF6C4:0002"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:BVD8HP3HZW6W:0001"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:BVD8HP3HZW6W:0003"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          }
+         ]
+        }
+       }
+      ]
+     }
+    ],
+    "MarketProperties": [
+     {}
+    ]
+   }
+  },
+  {
+   "id": "9NVD16NP4J8T",
+   "payload": {
+    "ProductId": "9NVD16NP4J8T",
+    "LocalizedProperties": [
+     {
+      "ProductTitle": "EA SPORTS™ Madden NFL 26",
+      "EligibilityProperties": {
+       "Remediations": [
+        {
+         "RemediationId": "9N8KCDNKJJQ6",
+         "Description": "Better With EA Play"
+        }
+       ],
+       "Affirmations": [
+        {
+         "AffirmationId": "B0HFJ7PW900M",
+         "AffirmationProductId": "CFQ7TTC0K5DH",
+         "Description": "Better With EA Play"
+        }
+       ]
+      }
+     }
+    ],
+    "DisplaySkuAvailabilities": [
+     {
+      "Availabilities": [
+       {
+        "Actions": [
+         "Details",
+         "Fulfill",
+         "Purchase",
+         "Browse",
+         "Curate",
+         "Redeem"
+        ]
+       },
+       {
+        "Actions": [
+         "Details",
+         "Purchase",
+         "Curate"
+        ]
+       },
+       {
+        "Actions": [
+         "Details",
+         "Fulfill",
+         "Browse",
+         "Curate",
+         "Gift"
+        ]
+       },
+       {
+        "Actions": [
+         "License",
+         "Browse",
+         "Details"
+        ],
+        "LicensingData": {
+         "SatisfyingEntitlementKeys": [
+          {
+           "EntitlementKeys": [
+            "big:9P8F8CT7WT6D:0017"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9P8F8CT7WT6D:0010"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9NVD16NP4J8T:0010"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9NVD16NP4J8T:0017"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "wes:App:ca651396-e9f9-412f-8f9a-ebe101905074:Full"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "wes:App:7a4f7801-8efb-4eda-b13f-7ccd84c98c52:Full"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9NVD16NP4J8T:0001"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9NVD16NP4J8T:0002"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:C10LP9LXL5Z6:0001"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:C10LP9LXL5Z6:0003"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          }
+         ]
+        }
+       },
+       {
+        "Actions": [
+         "License",
+         "Browse",
+         "Details"
+        ],
+        "LicensingData": {
+         "SatisfyingEntitlementKeys": [
+          {
+           "EntitlementKeys": [
+            "big:9P0DQG2G85X2:0017"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9P0DQG2G85X2:0010"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9NVD16NP4J8T:0010"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9NVD16NP4J8T:0017"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "wes:App:ca651396-e9f9-412f-8f9a-ebe101905074:Full"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "wes:App:7a4f7801-8efb-4eda-b13f-7ccd84c98c52:Full"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9NVD16NP4J8T:0001"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9NVD16NP4J8T:0002"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:C10LP9LXL5Z6:0001"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:C10LP9LXL5Z6:0003"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          }
+         ]
+        }
+       },
+       {
+        "Actions": [
+         "License",
+         "Browse",
+         "Details"
+        ],
+        "LicensingData": {
+         "SatisfyingEntitlementKeys": [
+          {
+           "EntitlementKeys": [
+            "big:9P6TLDXNV2BK:0017"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9P6TLDXNV2BK:0010"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9NVD16NP4J8T:0010"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9NVD16NP4J8T:0017"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "wes:App:ca651396-e9f9-412f-8f9a-ebe101905074:Full"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "wes:App:7a4f7801-8efb-4eda-b13f-7ccd84c98c52:Full"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9NVD16NP4J8T:0001"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9NVD16NP4J8T:0002"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:C10LP9LXL5Z6:0001"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:C10LP9LXL5Z6:0003"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          }
+         ]
+        }
+       }
+      ]
+     }
+    ],
+    "MarketProperties": [
+     {}
+    ]
+   }
+  },
+  {
+   "id": "9NLKS78C4F3Z",
+   "payload": {
+    "ProductId": "9NLKS78C4F3Z",
+    "LocalizedProperties": [
+     {
+      "ProductTitle": "EA SPORTS™ College Football 26",
+      "EligibilityProperties": {
+       "Remediations": [
+        {
+         "RemediationId": "9N8KCDNKJJQ6",
+         "Description": "Better With EA Play"
+        }
+       ],
+       "Affirmations": [
+        {
+         "AffirmationId": "B0HFJ7PW900M",
+         "AffirmationProductId": "CFQ7TTC0K5DH",
+         "Description": "Better With EA Play"
+        }
+       ]
+      }
+     }
+    ],
+    "DisplaySkuAvailabilities": [
+     {
+      "Availabilities": [
+       {
+        "Actions": [
+         "Details",
+         "Fulfill",
+         "Purchase",
+         "Browse",
+         "Curate",
+         "Redeem"
+        ]
+       },
+       {
+        "Actions": [
+         "Details",
+         "Purchase",
+         "Curate"
+        ]
+       },
+       {
+        "Actions": [
+         "Details",
+         "Fulfill",
+         "Browse",
+         "Curate",
+         "Gift"
+        ]
+       },
+       {
+        "Actions": [
+         "License",
+         "Browse",
+         "Details"
+        ],
+        "LicensingData": {
+         "SatisfyingEntitlementKeys": [
+          {
+           "EntitlementKeys": [
+            "big:9P8F8CT7WT6D:0017"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9P8F8CT7WT6D:0010"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9NLKS78C4F3Z:0010"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9NLKS78C4F3Z:0017"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "wes:App:e6e1ef13-3ce2-4620-bb04-cd1345cfd565:Full"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "wes:App:a00278e2-2dee-45a9-8a39-9e1f751776d9:Full"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9NLKS78C4F3Z:0001"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9NLKS78C4F3Z:0002"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:BTQLQJ9L79K5:0001"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:BTQLQJ9L79K5:0003"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          }
+         ]
+        }
+       },
+       {
+        "Actions": [
+         "License",
+         "Browse",
+         "Details"
+        ],
+        "LicensingData": {
+         "SatisfyingEntitlementKeys": [
+          {
+           "EntitlementKeys": [
+            "big:9PPF5DM1RBW0:0017"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9PPF5DM1RBW0:0010"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9NLKS78C4F3Z:0010"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9NLKS78C4F3Z:0017"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "wes:App:e6e1ef13-3ce2-4620-bb04-cd1345cfd565:Full"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "wes:App:a00278e2-2dee-45a9-8a39-9e1f751776d9:Full"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9NLKS78C4F3Z:0001"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9NLKS78C4F3Z:0002"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:BTQLQJ9L79K5:0001"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:BTQLQJ9L79K5:0003"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          }
+         ]
+        }
+       },
+       {
+        "Actions": [
+         "License",
+         "Browse",
+         "Details"
+        ],
+        "LicensingData": {
+         "SatisfyingEntitlementKeys": [
+          {
+           "EntitlementKeys": [
+            "big:9PPKTFZXK3KQ:0017"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9PPKTFZXK3KQ:0010"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9NLKS78C4F3Z:0010"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9NLKS78C4F3Z:0017"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "wes:App:e6e1ef13-3ce2-4620-bb04-cd1345cfd565:Full"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "wes:App:a00278e2-2dee-45a9-8a39-9e1f751776d9:Full"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9NLKS78C4F3Z:0001"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9NLKS78C4F3Z:0002"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:BTQLQJ9L79K5:0001"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:BTQLQJ9L79K5:0003"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          }
+         ]
+        }
+       }
+      ]
+     }
+    ],
+    "MarketProperties": [
+     {}
+    ]
+   }
+  },
+  {
+   "id": "9P3PT7PQJD0M",
+   "payload": {
+    "ProductId": "9P3PT7PQJD0M",
+    "LocalizedProperties": [
+     {
+      "ProductTitle": "HELLDIVERS™ 2",
+      "EligibilityProperties": {
+       "Remediations": [],
+       "Affirmations": []
+      }
+     }
+    ],
+    "DisplaySkuAvailabilities": [
+     {
+      "Availabilities": [
+       {
+        "Actions": [
+         "Details",
+         "Fulfill",
+         "Purchase",
+         "Browse",
+         "Curate",
+         "Redeem"
+        ]
+       },
+       {
+        "Actions": [
+         "Details",
+         "Fulfill",
+         "Browse",
+         "Curate",
+         "Gift"
+        ]
+       },
+       {
+        "Actions": [
+         "License",
+         "Browse",
+         "Details"
+        ],
+        "LicensingData": {
+         "SatisfyingEntitlementKeys": [
+          {
+           "EntitlementKeys": [
+            "big:9P3PT7PQJD0M:0010"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9P3PT7PQJD0M:0017"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "wes:App:cd11f389-8a64-4b53-8be2-e0447de7a481:Full"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "wes:App:89996688-cc29-407c-98f4-6c0810cf1838:Full"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9P3PT7PQJD0M:0001"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9P3PT7PQJD0M:0002"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:BXN6684PCB5Q:0001"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:BXN6684PCB5Q:0003"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          }
+         ]
+        }
+       },
+       {
+        "Actions": [
+         "License",
+         "Browse",
+         "Details"
+        ],
+        "LicensingData": {
+         "SatisfyingEntitlementKeys": [
+          {
+           "EntitlementKeys": [
+            "big:9MW4TBHPTR54:0017"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ],
+           "PreOrderReleaseDate": "2025-08-26T08:00:00.0000000Z"
+          },
+          {
+           "EntitlementKeys": [
+            "big:9MW4TBHPTR54:0010"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ],
+           "PreOrderReleaseDate": "2025-08-26T08:00:00.0000000Z"
+          },
+          {
+           "EntitlementKeys": [
+            "big:9P3PT7PQJD0M:0010"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9P3PT7PQJD0M:0017"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "wes:App:cd11f389-8a64-4b53-8be2-e0447de7a481:Full"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "wes:App:89996688-cc29-407c-98f4-6c0810cf1838:Full"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9P3PT7PQJD0M:0001"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9P3PT7PQJD0M:0002"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:BXN6684PCB5Q:0001"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:BXN6684PCB5Q:0003"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          }
+         ]
+        }
+       },
+       {
+        "Actions": [
+         "License",
+         "Browse",
+         "Details"
+        ],
+        "LicensingData": {
+         "SatisfyingEntitlementKeys": [
+          {
+           "EntitlementKeys": [
+            "big:9MX9WN9DFPGT:0017"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ],
+           "PreOrderReleaseDate": "2025-08-26T08:00:00.0000000Z"
+          },
+          {
+           "EntitlementKeys": [
+            "big:9MX9WN9DFPGT:0010"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ],
+           "PreOrderReleaseDate": "2025-08-26T08:00:00.0000000Z"
+          },
+          {
+           "EntitlementKeys": [
+            "big:9P3PT7PQJD0M:0010"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9P3PT7PQJD0M:0017"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "wes:App:cd11f389-8a64-4b53-8be2-e0447de7a481:Full"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "wes:App:89996688-cc29-407c-98f4-6c0810cf1838:Full"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9P3PT7PQJD0M:0001"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9P3PT7PQJD0M:0002"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:BXN6684PCB5Q:0001"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:BXN6684PCB5Q:0003"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          }
+         ]
+        }
+       },
+       {
+        "Actions": [
+         "License",
+         "Browse",
+         "Details"
+        ],
+        "LicensingData": {
+         "SatisfyingEntitlementKeys": [
+          {
+           "EntitlementKeys": [
+            "big:9P4H9CTBWV3G:0017"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9P4H9CTBWV3G:0010"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9P3PT7PQJD0M:0010"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9P3PT7PQJD0M:0017"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "wes:App:cd11f389-8a64-4b53-8be2-e0447de7a481:Full"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "wes:App:89996688-cc29-407c-98f4-6c0810cf1838:Full"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9P3PT7PQJD0M:0001"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9P3PT7PQJD0M:0002"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:BXN6684PCB5Q:0001"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:BXN6684PCB5Q:0003"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          }
+         ]
+        }
+       }
+      ]
+     }
+    ],
+    "MarketProperties": [
+     {}
+    ]
+   }
+  },
+  {
+   "id": "9PJ6FV3130QZ",
+   "payload": {
+    "ProductId": "9PJ6FV3130QZ",
+    "LocalizedProperties": [
+     {
+      "ProductTitle": "Dune: Awakening",
+      "EligibilityProperties": {
+       "Remediations": [
+        {
+         "RemediationId": "9Q79ZD19RGPT",
+         "Description": "Get Xbox Game Pass Premium today to take advantage of a catalog of hundreds of high-quality games, online console multiplayer, and exclusive deals."
+        },
+        {
+         "RemediationId": "9SJCZDHW896G",
+         "Description": "With Xbox Game Pass, you can play more great games anytime."
+        },
+        {
+         "RemediationId": "9ZNPVF4DTWVC",
+         "Description": "With Game Pass, you can play more great games anytime."
+        }
+       ],
+       "Affirmations": [
+        {
+         "AffirmationId": "B0548W4C4H83",
+         "AffirmationProductId": "CFQ7TTC0P85B",
+         "Description": "with your Xbox Game Pass Premium membership."
+        },
+        {
+         "AffirmationId": "9WNZS2ZC9L74",
+         "AffirmationProductId": "CFQ7TTC0K6L8",
+         "Description": "with your Xbox Game Pass membership"
+        },
+        {
+         "AffirmationId": "B1FFW2F7JKV0",
+         "AffirmationProductId": "CFQ7TTC0KGQ8",
+         "Description": "with your Game Pass membership"
+        }
+       ]
+      }
+     }
+    ],
+    "DisplaySkuAvailabilities": [
+     {
+      "Availabilities": [
+       {
+        "Actions": [
+         "Details",
+         "Fulfill",
+         "Purchase",
+         "Browse",
+         "Curate",
+         "Redeem"
+        ]
+       },
+       {
+        "Actions": [
+         "Details",
+         "Purchase",
+         "Curate"
+        ]
+       },
+       {
+        "Actions": [
+         "Details",
+         "Purchase",
+         "Curate"
+        ]
+       },
+       {
+        "Actions": [
+         "Details",
+         "Purchase",
+         "Curate"
+        ]
+       },
+       {
+        "Actions": [
+         "Details",
+         "Fulfill",
+         "Browse",
+         "Curate",
+         "Gift"
+        ]
+       },
+       {
+        "Actions": [
+         "License",
+         "Browse",
+         "Details"
+        ],
+        "LicensingData": {
+         "SatisfyingEntitlementKeys": [
+          {
+           "EntitlementKeys": [
+            "big:9MZGWXBP42NF:0017"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9MZGWXBP42NF:0010"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9PJ6FV3130QZ:0010"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9PJ6FV3130QZ:0017"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "wes:App:3e238531-5abd-48af-95dc-f82349ac1f07:Full"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "wes:App:85faf1d3-e246-4d59-8f4c-56fcc5f0dbc7:Full"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9PJ6FV3130QZ:0001"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9PJ6FV3130QZ:0002"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:BSVBB06XC84Z:0001"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:BSVBB06XC84Z:0003"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          }
+         ]
+        }
+       }
+      ]
+     }
+    ],
+    "MarketProperties": [
+     {}
+    ]
+   }
+  },
+  {
+   "id": "9P402RWR63H4",
+   "payload": {
+    "ProductId": "9P402RWR63H4",
+    "LocalizedProperties": [
+     {
+      "ProductTitle": "RuneScape: Dragonwilds",
+      "EligibilityProperties": {
+       "Remediations": [
+        {
+         "RemediationId": "B1976WWNPS1Z",
+         "Description": "Get Xbox Game Pass Premium today to take advantage of a catalog of hundreds of high-quality games, online console multiplayer, and exclusive deals."
+        },
+        {
+         "RemediationId": "9SJCZDHW896G",
+         "Description": "With Xbox Game Pass, you can play more great games anytime."
+        },
+        {
+         "RemediationId": "9ZNPVF4DTWVC",
+         "Description": "With Game Pass, you can play more great games anytime."
+        }
+       ],
+       "Affirmations": [
+        {
+         "AffirmationId": "9VWNBNGZ8LD4",
+         "AffirmationProductId": "CFQ7TTC0P85B",
+         "Description": "with your Xbox Game Pass Premium membership."
+        },
+        {
+         "AffirmationId": "9WNZS2ZC9L74",
+         "AffirmationProductId": "CFQ7TTC0K6L8",
+         "Description": "with your Xbox Game Pass membership"
+        },
+        {
+         "AffirmationId": "B1FFW2F7JKV0",
+         "AffirmationProductId": "CFQ7TTC0KGQ8",
+         "Description": "with your Game Pass membership"
+        }
+       ]
+      }
+     }
+    ],
+    "DisplaySkuAvailabilities": [
+     {
+      "Availabilities": [
+       {
+        "Actions": [
+         "Details",
+         "Fulfill",
+         "Purchase",
+         "Browse",
+         "Curate",
+         "Redeem"
+        ]
+       },
+       {
+        "Actions": [
+         "Details",
+         "Purchase",
+         "Curate"
+        ]
+       },
+       {
+        "Actions": [
+         "Details",
+         "Purchase",
+         "Curate"
+        ]
+       },
+       {
+        "Actions": [
+         "Details",
+         "Purchase",
+         "Curate"
+        ]
+       },
+       {
+        "Actions": [
+         "Details",
+         "Fulfill",
+         "Browse",
+         "Curate",
+         "Gift"
+        ]
+       },
+       {
+        "Actions": [
+         "License",
+         "Browse",
+         "Details"
+        ],
+        "LicensingData": {
+         "SatisfyingEntitlementKeys": [
+          {
+           "EntitlementKeys": [
+            "big:9P402RWR63H4:0010"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "wes:App:562d9b88-98fd-41a6-a20e-27e535fc91d8:Full"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "wes:App:a6ba2827-0bfe-4ee4-884c-6fa7f0d76d05:Full"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9P402RWR63H4:0001"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:9P402RWR63H4:0002"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:BR8FGG2ZF941:0001"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          },
+          {
+           "EntitlementKeys": [
+            "big:BR8FGG2ZF941:0003"
+           ],
+           "LicensingKeyIds": [
+            "1"
+           ]
+          }
+         ]
+        }
+       }
+      ]
+     }
+    ],
+    "MarketProperties": [
+     {}
+    ]
+   }
+  }
+ ]
+}

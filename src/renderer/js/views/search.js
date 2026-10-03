@@ -113,7 +113,7 @@ export function openPalette(ctx, initial = '') {
       group: t('games'),
       label: hit.p.title,
       sub: hit.p.publisher || hit.p.developer || '',
-      img: cat.portraitArt(hit.p),
+      img: cat.sizedArt(cat.portraitArt(hit.p), 120),
       run: () => { close(); ctx.openDetails(hit.p); },
     }));
     flat = [...games, ...settingsMatches(q), ...profileMatches(q, ctx), ...navMatches(q)];

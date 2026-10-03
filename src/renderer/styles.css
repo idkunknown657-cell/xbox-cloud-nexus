@@ -116,6 +116,7 @@ body.hc {
   transition: background var(--dur-1) var(--ease);
 }
 .titlebar .tb-btn:hover { background: var(--surface-2); color: var(--text); }
+.titlebar .tb-btn.off { color: var(--text-3); }
 .titlebar .tb-btn.close:hover { background: #d13438; color: #fff; }
 
 .sidebar {
@@ -156,6 +157,31 @@ body.perf-blur .sidebar { backdrop-filter: blur(14px); }
 .status-chip.ok .dot { background: var(--accent); box-shadow: 0 0 8px var(--accent-dim); }
 .status-chip.warn .dot { background: #f8c840; }
 .status-chip.err .dot { background: #e5484d; }
+
+/* ---------- Sidebar account chip ---------- */
+.account-chip { width: 100%; justify-content: flex-start; text-align: left; margin-bottom: 6px; }
+.account-chip.accent,
+.account-chip:not(.ok) { color: var(--accent); }
+.account-chip.ok .acct-sub { color: var(--accent); }
+.acct-text { display: flex; flex-direction: column; min-width: 0; line-height: 1.25; }
+.acct-name { font-size: 13px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.acct-sub { font-size: 11px; color: var(--text-3); }
+
+/* ---------- Account card (Settings → Account) ---------- */
+.acct-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
+.acct-status {
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  margin: 0 0 4px; padding: 14px 16px; border-radius: var(--radius);
+  background: var(--surface-2); border: 1px solid var(--line);
+}
+.acct-status .status-chip {
+  padding: 6px 12px; border-radius: 999px;
+  background: var(--surface-3); border: 1px solid var(--line);
+  font-weight: 700; color: var(--text-2); flex: 0 0 auto;
+}
+.acct-status .status-chip.ok { color: var(--accent); background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 30%, transparent); }
+.acct-status .r-desc { flex: 1 1 320px; min-width: 0; }
+.acct-actions .btn.busy { opacity: 0.6; pointer-events: none; }
 
 .main { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 50px 0 0; scroll-behavior: smooth; }
 .page { padding: 20px 30px 60px; max-width: 1560px; margin: 0 auto; }
@@ -260,7 +286,7 @@ body.theme-light .hero-bg::after {
 .hero-dots button.on { width: 22px; background: var(--accent); }
 
 /* ---------- Sections & carousels ---------- */
-.section { margin-bottom: 38px; }
+.section { margin-bottom: 44px; }
 .section-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 14px; }
 .section-title { font-size: 19px; font-weight: 700; letter-spacing: -0.2px; display: flex; align-items: center; gap: 10px; }
 .section-title .chip { font-size: 11px; font-weight: 700; letter-spacing: 0.8px; background: var(--accent-soft); color: var(--accent); border-radius: 6px; padding: 3px 8px; text-transform: uppercase; }
@@ -301,6 +327,25 @@ body.theme-light .hero-bg::after {
 .tag { font-size: 10.5px; font-weight: 600; letter-spacing: 0.3px; padding: 3px 8px; border-radius: 6px; background: rgba(255,255,255,0.14); color: #e8efe9; border: 1px solid rgba(255,255,255,0.14); }
 body.theme-light .tag { background: rgba(10,14,11,0.75); }
 .tag.accent { background: var(--accent-soft); color: var(--accent); border-color: color-mix(in srgb, var(--accent) 30%, transparent); }
+/* Access badges: INCLUDED / FREE / ADS / SUB. */
+.tag.plan { background: rgba(86, 214, 146, 0.14); color: #7fe3ab; border-color: rgba(86, 214, 146, 0.34); }
+.tag.locked { background: rgba(229, 72, 77, 0.14); color: #ff9ea2; border-color: rgba(229, 72, 77, 0.34); }
+.access-note {
+  display: flex; align-items: center; gap: 8px; margin: 10px 0 2px;
+  font-size: 12.5px; line-height: 1.5; color: var(--text-2);
+}
+.access-note > svg { flex: 0 0 auto; color: var(--accent); }
+.access-note.blocked { color: #ffb3b6; }
+.access-note.blocked > svg { color: #ff8f93; }
+.access-note .linkbtn { flex: 0 0 auto; }
+.btn.disabled, .btn[disabled] { opacity: 0.55; cursor: not-allowed; }
+.btn.disabled:hover, .btn[disabled]:hover { transform: none; }
+.acct-plan { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.acct-plan-chip {
+  font-size: 12px; font-weight: 700; color: var(--accent);
+  background: var(--accent-soft); border: 1px solid color-mix(in srgb, var(--accent) 26%, transparent);
+  padding: 4px 10px; border-radius: 999px;
+}
 .card .g-play { display: flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 700; color: #07230d; background: var(--accent); border-radius: 8px; padding: 8px 0; justify-content: center; transition: transform var(--dur-1) var(--ease); }
 .card .g-play:hover { transform: scale(1.02); }
 .card .fav { position: absolute; top: 8px; right: 8px; z-index: 3; width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center;
@@ -315,11 +360,11 @@ body.theme-light .tag { background: rgba(10,14,11,0.75); }
 body.perf-noanim .card .shimmer { display: none; }
 
 /* ---------- Panels / settings ---------- */
-.panel { background: var(--surface-1); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 26px; margin-bottom: 22px; }
-.panel h3 { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
-.panel .p-desc { color: var(--text-3); font-size: 13px; margin-bottom: 18px; }
+.panel { background: var(--surface-1); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 28px 30px; margin-bottom: 24px; }
+.panel h3 { font-size: 16px; font-weight: 700; margin-bottom: 5px; }
+.panel .p-desc { color: var(--text-3); font-size: 13px; line-height: 1.55; margin-bottom: 20px; }
 
-.row { display: flex; align-items: center; gap: 14px; padding: 13px 0; border-bottom: 1px solid var(--line); }
+.row { display: flex; align-items: center; gap: 16px; padding: 15px 0; border-bottom: 1px solid var(--line); }
 .row:last-child { border-bottom: none; }
 .row .r-main { flex: 1; min-width: 0; }
 .row .r-title { font-weight: 600; font-size: 14px; }
@@ -354,25 +399,16 @@ body.perf-noanim .card .shimmer { display: none; }
 .textin:focus { border-color: var(--accent-dim); box-shadow: 0 0 0 3px var(--accent-soft); }
 
 /* ---------- Settings layout ---------- */
-.settings-wrap { display: grid; grid-template-columns: 218px 1fr; gap: 26px; align-items: start; }
-.settings-nav { position: sticky; top: 66px; display: flex; flex-direction: column; gap: 3px; }
-.settings-nav .nav-item { padding: 9px 12px; font-size: 13.5px; }
-.settings-search { margin-bottom: 12px; }
+.settings-wrap { display: grid; grid-template-columns: 232px 1fr; gap: 32px; align-items: start; }
+.settings-nav { position: sticky; top: 66px; display: flex; flex-direction: column; gap: 4px; padding: 10px; border-radius: var(--radius); background: var(--surface-0); border: 1px solid var(--line); }
+.settings-nav .nav-item { padding: 11px 14px; font-size: 13.5px; }
+.settings-search { margin-bottom: 18px; }
 @media (max-width: 900px) { .settings-wrap { grid-template-columns: 1fr; } .settings-nav { position: static; flex-direction: row; flex-wrap: wrap; } }
 
-/* ---------- Controller remap UI ---------- */
-.controller-visual { position: relative; width: 100%; max-width: 520px; margin: 0 auto; }
-.cv-btn { position: absolute; display: grid; place-items: center; font-size: 10px; font-weight: 700; color: var(--text-2);
-  background: var(--surface-2); border: 1px solid var(--line-strong); border-radius: 8px; min-width: 34px; min-height: 30px;
-  transition: all var(--dur-1) var(--ease); padding: 2px 4px; line-height: 1.1; text-align: center; }
-.cv-btn:hover { border-color: var(--accent-dim); color: var(--text); transform: scale(1.06); }
-.cv-btn.selected { border-color: var(--accent); color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
-.cv-btn.listening { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); animation: pulse 1s infinite var(--ease); }
-.cv-btn .k { display: block; font-size: 9.5px; color: var(--accent); font-weight: 800; max-width: 64px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-@keyframes pulse { 50% { box-shadow: 0 0 0 6px var(--accent-soft); } }
-body.perf-noanim .cv-btn.listening { animation: none; }
-
-.cv-body { position: absolute; inset: 0; pointer-events: none; }
+/* The controller diagram lives entirely in styles-controls.css (.cx-* classes).
+   The old .cv-* remap UI was removed with its markup — keeping it here left a
+   stray max-width on .controller-visual that capped the artwork in the new
+   three-column layout. */
 .cv-body svg { width: 100%; height: 100%; }
 .cv-hit { pointer-events: auto; position: absolute; cursor: pointer; }
 

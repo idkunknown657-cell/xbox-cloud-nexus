@@ -59,9 +59,52 @@ offers — it makes that offering comfortable on a PC. These are the real limits
 - Better xCloud is MIT licensed and credits `redphx`; see
   [`LICENSE-BETTER-XCLOUD`](LICENSE-BETTER-XCLOUD).
 
+## Sign-in and account
+
+- Sign-in always happens on Microsoft's own page. The app never renders a login form and
+  never reads, stores or forwards a password, token or cookie value.
+- **A sign-in completed in your web browser does not connect Nexus.** Cookies belong to
+  the browser that made them, so the app needs its own one-time sign-in in the window it
+  opens — that session partition is the one the game windows use. The app says this
+  explicitly instead of leaving you wondering why the launcher stayed signed out.
+- Signing out clears only the `persist:stream` partition the app created for Xbox; cookies,
+  saved games and any browser session are untouched.
+- The subscription tier is read from the signed-in Microsoft page when it can be read. That
+  page is Microsoft's own rendering of your account, but it is not a stable API: if it
+  changes, the plan falls back to "unknown" and every Game Pass title is offered rather than
+  wrongly blocked. You can also set the tier by hand in Settings → Account.
+- Microsoft occasionally loads an embedded sign-in in a popup. Popups are pinned to the same
+  session partition so the resulting session is the one the games use; a popup Microsoft
+  opens outside its own domains is handed to your browser instead.
+
+## Entitlements and availability
+
+- Access badges come from Microsoft's public, unauthenticated display catalogue, queried for
+  your market. They are a *label*, never a grant: the official play page still decides
+  every launch.
+- Titles offered through ad-supported streaming are taken from Xbox's own Play-with-Ads list
+  for your market. Whether a given account, region and title combination is actually served
+  with ads is decided by Xbox at stream time.
+- A title that is both in Game Pass and free to start is shown as playable for an account
+  with no subscription; the catalogue does not always expose a price for cloud titles, so
+  the app never claims a purchase is required on incomplete data — it shows what Microsoft
+  published and lets the official page arbitrate.
+- Regional availability is whatever the catalogue reports for the market in Settings →
+  Cloud Gaming. A title offered in one region may be absent in another.
+
+## Build and packaging
+
+- `npm run dist` uses `scripts/build-win.mjs`, which builds the unpacked app with
+  `--win dir`, stamps the version resources with the cached `rcedit`, and only then produces
+  the NSIS installer and the portable executable. This avoids the Windows symlink privilege
+  that a plain `electron-builder` run needs for its code-signing cache.
+- The EXEs are **not code-signed**, so SmartScreen will warn on first run. Sign them with
+  your own certificate for distribution.
+
 ## What this app will never do
 
 - Bypass DRM, authentication, regional restrictions or any access control.
 - Present a fake Microsoft sign-in page.
 - Store or log credentials, tokens or session cookies.
 - Claim a game is free or ad-supported when the service does not say so.
+- Grant access the account does not have, or hide a game the account can play.

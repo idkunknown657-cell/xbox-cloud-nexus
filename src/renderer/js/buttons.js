@@ -61,6 +61,7 @@ export function buttonLabel(id) {
 
 // ---------- Key code vocabulary ----------
 const MODIFIERS = {
+  ContextMenu: 'Menu',
   ShiftLeft: 'Left Shift', ShiftRight: 'Right Shift',
   ControlLeft: 'Left Ctrl', ControlRight: 'Right Ctrl',
   AltLeft: 'Left Alt', AltRight: 'Right Alt',
@@ -87,8 +88,34 @@ export const MOUSE_CODES = ['Mouse0', 'Mouse1', 'Mouse2', 'Mouse3', 'Mouse4'];
 /**
  * Shortcuts we refuse to capture: the app would become un-navigable and the
  * Windows shell would intercept them before the game ever saw them.
+ * Note Tab is *allowed* — it is the shipped default for View — while Escape
+ * stays reserved so a capture can always be cancelled.
  */
-export const BLOCKED_CODES = new Set(['MetaLeft', 'MetaRight', 'Tab', 'Escape', 'F12']);
+export const BLOCKED_CODES = new Set(['MetaLeft', 'MetaRight', 'Escape', 'F12']);
+
+/**
+ * Keyboard visual: glyph -> KeyboardEvent.code.
+ * A physical layout table, not a guess: `-` must become Minus and `'` Quote,
+ * otherwise clicking those keys would try to bind a code Better xCloud does not
+ * accept and the click would silently do nothing.
+ */
+export const KEY_CODE_BY_GLYPH = {
+  '`': 'Backquote', '~': 'Backquote', 'Backspace': 'Backspace', 'Tab': 'Tab', 'Caps': 'CapsLock',
+  'Enter': 'Enter', 'Shift': 'ShiftLeft', 'Ctrl': 'ControlLeft', 'Alt': 'AltLeft', 'Win': 'MetaLeft',
+  'Menu': 'ContextMenu', 'Space': 'Space',
+  '-': 'Minus', '=': 'Equal', '[': 'BracketLeft', ']': 'BracketRight', '\\': 'Backslash',
+  ';': 'Semicolon', "'": 'Quote', ',': 'Comma', '.': 'Period', '/': 'Slash',
+  '↑': 'ArrowUp', '↓': 'ArrowDown', '←': 'ArrowLeft', '→': 'ArrowRight',
+};
+
+/** Resolve a keyboard-visual glyph ("W", "7", "F4", "-") to a key code. */
+export function keyCodeForGlyph(glyph) {
+  if (KEY_CODE_BY_GLYPH[glyph]) return KEY_CODE_BY_GLYPH[glyph];
+  if (/^[a-z]$/i.test(glyph)) return `Key${glyph.toUpperCase()}`;
+  if (/^[0-9]$/.test(glyph)) return `Digit${glyph}`;
+  if (/^F\d{1,2}$/.test(glyph)) return glyph;
+  return null;
+}
 
 const CODE_LABELS = {
   Space: 'Space', Enter: 'Enter', Tab: 'Tab', Escape: 'Esc', Backspace: 'Backspace', Backquote: '`',

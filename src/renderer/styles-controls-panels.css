@@ -1,0 +1,286 @@
+/* ============================================================
+   Controls screen — three-column layout, right rail and the
+   Keyboard & Mouse / mouse-artwork panels.
+
+   Same motion policy as the rest of the app: only opacity and
+   transform animate, so live input feedback stays cheap on an
+   integrated GPU and a low-end laptop never drops input frames.
+   ============================================================ */
+
+/* ---------- Three columns: list · artwork · rail ---------- */
+.controls-3col {
+  display: grid;
+  grid-template-columns: minmax(244px, 276px) minmax(0, 1fr) minmax(288px, 322px);
+  gap: 26px; align-items: start;
+}
+.controls-mid { display: flex; flex-direction: column; gap: 24px; min-width: 0; }
+.controls-rail { display: flex; flex-direction: column; gap: 20px; min-width: 0; position: sticky; top: 74px; }
+
+/*
+ * The columns answer to the *panel* width, not the window width: with a window
+ * wider than the content area (sidebar + settings nav), a viewport media query
+ * would happily keep three columns in a space that only fits two and squeeze the
+ * keyboard into a strip. Container queries cannot make that mistake.
+ */
+@container (max-width: 1180px) {
+  .controls-3col { grid-template-columns: minmax(228px, 262px) minmax(0, 1fr); }
+  .controls-rail { grid-column: 1 / -1; position: static; flex-direction: row; flex-wrap: wrap; gap: 16px; }
+  .controls-rail > .rail-card { flex: 1 1 320px; }
+}
+@container (max-width: 820px) {
+  .controls-3col { grid-template-columns: minmax(0, 1fr); }
+  .controls-rail { flex-direction: column; }
+}
+
+.controls-mid { container-type: inline-size; container-name: mid; }
+/* NOTE: the `mid` container query that stacks .kbm-split lives AFTER the base
+   .kbm-split rule further down — a container query adds no specificity, so
+   declared first it would simply lose to the base declaration every time.
+   That is exactly how the keyboard ended up clipped at 1600x900. */
+
+.panel-tight { padding: 18px 20px; }
+.mini-head {
+  display: flex; align-items: center; gap: 9px; padding-bottom: 11px; margin-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+}
+.mini-head > svg { color: var(--accent); flex: 0 0 auto; }
+.mini-head h4 { font-size: 13px; font-weight: 700; letter-spacing: 0.1px; }
+.mini-head .linkbtn { margin-left: auto; }
+.linkbtn {
+  font-size: 12px; font-weight: 700; color: var(--accent);
+  padding: 3px 7px; border-radius: 7px; transition: background var(--dur-1) var(--ease);
+}
+.linkbtn:hover { background: var(--accent-soft); }
+
+.map-card { display: flex; flex-direction: column; gap: 10px; }
+.map-card .map-list-wrap { max-height: 560px; }
+.dd-block { display: block; width: 100%; }
+.dd-block .dd-trigger { width: 100%; }
+
+/* ---------- Right rail ---------- */
+.rail-card { display: flex; flex-direction: column; }
+.rail-desc { font-size: 12.5px; color: var(--text-3); line-height: 1.55; margin-bottom: 14px; }
+
+.rail-profile-list { display: flex; flex-direction: column; gap: 5px; }
+.rail-profile {
+  display: flex; align-items: center; gap: 11px; width: 100%; text-align: left;
+  padding: 11px 12px; border-radius: 11px; border: 1px solid transparent;
+  transition: background var(--dur-1) var(--ease), border-color var(--dur-1) var(--ease),
+              transform var(--dur-1) var(--ease);
+}
+.rail-profile:hover { background: var(--surface-2); }
+.rail-profile:active { transform: scale(0.99); }
+.rail-profile.is-active {
+  background: var(--accent-soft);
+  border-color: color-mix(in srgb, var(--accent) 38%, transparent);
+}
+.rail-profile.selected:not(.is-active) { border-color: var(--line-strong); }
+.rp-ico { display: inline-flex; color: var(--text-3); }
+.rail-profile.is-active .rp-ico { color: var(--accent); }
+.rp-text { flex: 1; min-width: 0; }
+.rp-name { font-size: 13px; font-weight: 650; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rp-meta { font-size: 11px; color: var(--text-3); }
+.rp-flag {
+  display: inline-flex; align-items: center; gap: 5px; flex: 0 0 auto;
+  font-size: 10px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase;
+  color: var(--accent); padding: 3px 8px; border-radius: 999px; background: var(--surface-0);
+}
+.rp-flag .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+.rp-flag.muted { color: var(--text-3); background: var(--surface-3); }
+.rp-chev { display: inline-flex; color: var(--text-3); opacity: 0; transition: opacity var(--dur-1) var(--ease); }
+.rail-profile:hover .rp-chev { opacity: 1; }
+.rail-actions { display: flex; gap: 10px; margin-top: 16px; }
+.rail-actions .btn { flex: 1; justify-content: center; }
+
+/* ---------- Live test card ---------- */
+.rail-test-row { display: flex; align-items: center; gap: 12px; }
+.live-pad {
+  position: relative; width: 46px; height: 46px; flex: 0 0 auto;
+  display: grid; place-items: center; border-radius: 50%;
+  background: var(--surface-2); border: 1px solid var(--line-strong); color: var(--text-3);
+  transition: color var(--dur-1) var(--ease), border-color var(--dur-1) var(--ease);
+}
+.live-pad .lp-ring {
+  position: absolute; inset: -4px; border-radius: 50%;
+  border: 2px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  opacity: 0; transform: scale(0.86);
+  transition: opacity var(--dur-2) var(--ease), transform var(--dur-2) var(--ease);
+}
+.live-pad.on { color: var(--accent); border-color: var(--accent); }
+.live-pad.on .lp-ring { opacity: 1; transform: scale(1); }
+.rail-test-values { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px; }
+.tv-line { display: flex; align-items: baseline; gap: 8px; }
+.tv-label { font-size: 11px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase; color: var(--text-3); }
+.tv-value {
+  margin-left: auto; font-size: 13px; font-weight: 700; color: var(--text);
+  max-width: 58%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.rail-test-foot { display: flex; align-items: center; gap: 12px; margin-top: 18px; }
+.rail-test-foot .btn { flex: 1; justify-content: center; }
+
+/* ---------- Quick actions ---------- */
+.quick-actions { display: flex; flex-direction: column; gap: 4px; }
+.quick-actions .quick-item { padding: 12px 12px; font-size: 13px; gap: 12px; }
+.qa-ico { display: inline-flex; color: var(--text-3); }
+.qa-label { flex: 1; min-width: 0; }
+.qa-badge {
+  min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px;
+  display: inline-grid; place-items: center;
+  font-size: 11px; font-weight: 800; color: #fff; background: #e5484d;
+  opacity: 0; transform: scale(0.8);
+  transition: opacity var(--dur-1) var(--ease), transform var(--dur-1) var(--ease);
+}
+.qa-badge.on { opacity: 1; transform: scale(1); }
+
+/* ---------- Keyboard & Mouse panel ---------- */
+.kbm-panel { display: flex; flex-direction: column; }
+.kbm-split { display: grid; grid-template-columns: minmax(0, 1fr) 268px; gap: 26px; align-items: start; }
+/* Below ~900px of panel the two cannot coexist: the keyboard alone wants
+   520px, the mouse card 268px, plus the gap and the panel padding. Stack
+   instead of squeezing. */
+@container mid (max-width: 900px) {
+  .kbm-split { grid-template-columns: minmax(0, 1fr); }
+}
+/* A keyboard needs room to look like a keyboard: scroll the panel rather than
+   letting 14 keys collapse into vertical slivers. */
+.kbm-left { min-width: 0; overflow-x: auto; }
+.keyboard { min-width: 520px; }
+.kbm-tab-body { min-height: 224px; }
+.mouse-card .mini-head { margin-bottom: 10px; }
+.mouse-card .row.compact { padding: 12px 0; border-bottom: 1px solid var(--line); }
+.mouse-card .row.compact:last-child { border-bottom: none; }
+.mouse-card .r-title { font-size: 12.5px; }
+.mouse-card .slider-row { gap: 8px; }
+.mouse-card .slider-val { min-width: 42px; font-size: 12px; }
+
+/* ---------- Mouse artwork ---------- */
+.mouse-wrap { display: grid; place-items: center; padding: 10px 0 4px; }
+.mouse-visual { position: relative; width: 250px; height: 250px; }
+.mouse-shell { position: absolute; inset: 24px 62px 34px; }
+.ms-body {
+  position: absolute; inset: 0; border-radius: 62px 62px 54px 54px / 78px 78px 44px 44px;
+  background: linear-gradient(180deg, var(--surface-3), var(--surface-1));
+  border: 1px solid var(--line-strong);
+}
+.ms-body::after {
+  content: ''; position: absolute; left: 50%; top: 0; bottom: 46%;
+  width: 1px; transform: translateX(-0.5px); background: var(--line-strong);
+}
+.ms-wheel {
+  position: absolute; left: 50%; top: 12%; width: 14px; height: 44px;
+  transform: translateX(-50%); border-radius: 8px;
+  background: var(--surface-0); border: 1px solid var(--line-strong);
+}
+.ms-glide {
+  position: absolute; left: 14%; right: 14%; bottom: 14%; height: 4px;
+  border-radius: 999px; background: var(--surface-0); opacity: 0.7;
+}
+.mv-hot {
+  position: absolute; display: flex; align-items: center; gap: 6px;
+  padding: 4px 9px; border-radius: 999px; white-space: nowrap;
+  background: var(--surface-2); border: 1px solid var(--line-strong);
+  font-size: 11px; font-weight: 700; color: var(--text-3);
+  transition: border-color var(--dur-1) var(--ease), color var(--dur-1) var(--ease),
+              background var(--dur-1) var(--ease), transform var(--dur-1) var(--ease);
+}
+.mv-hot:hover { border-color: var(--accent); color: var(--text); transform: translateY(-1px); }
+.mv-hot.bound { color: var(--accent); background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 30%, transparent); }
+.mv-bind { font-size: 10px; font-weight: 800; }
+.mv-left { left: -4px; top: 34px; }
+.mv-right { right: -4px; top: 34px; }
+.mv-mid { left: 50%; top: 96px; transform: translateX(-50%); }
+.mv-mid:hover { transform: translateX(-50%) translateY(-1px); }
+.mv-side1 { left: -6px; top: 128px; }
+.mv-side2 { right: -6px; top: 128px; }
+
+/* ---------- Live input reaction ---------- */
+.map-item.live {
+  background: var(--accent-soft);
+  border-color: color-mix(in srgb, var(--accent) 42%, transparent);
+}
+.cx-face.live, .cx-callout.live, .cx-stick.live, .cx-axis.live, .cx-dpdir.live {
+  border-color: var(--accent); color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 26%, var(--surface-2));
+}
+.cx-face.live .fb-key, .cx-axis.live .ax-key, .cx-dpdir.live .dp-key, .cx-callout.live .co-key {
+  color: var(--accent);
+}
+
+/* ---------- Attribution footer ---------- */
+.kbm-footer {
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  padding: 15px 20px; border-radius: var(--radius);
+  background: var(--surface-0); border: 1px solid var(--line);
+  font-size: 12.5px; color: var(--text-2);
+}
+.kf-note { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 260px; line-height: 1.6; }
+.kf-note > svg { color: var(--text-3); flex: 0 0 auto; }
+.kf-brand { display: flex; align-items: center; gap: 8px; font-weight: 650; color: var(--text-3); }
+.kf-brand > svg { color: var(--accent); }
+.kbm-footer .kf-link { color: var(--accent); font-weight: 700; font-size: 12.5px; }
+.kbm-footer .kf-link:hover { text-decoration: underline; }
+
+@media (prefers-reduced-motion: reduce) {
+  .qv-hot, .mv-hot, .rail-profile { transition: none; }
+}
+
+/* ---------- Microsoft sign-in gateway ---------- */
+.signin-gate {
+  position: fixed; inset: 0; z-index: 900;
+  display: grid; place-items: center; padding: 28px;
+  background: radial-gradient(1200px 620px at 50% -10%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 70%),
+              color-mix(in srgb, #05070a 88%, transparent);
+  backdrop-filter: blur(3px);
+  opacity: 0; transition: opacity 220ms var(--ease);
+}
+.signin-gate.sg-in { opacity: 1; }
+.signin-gate.sg-leaving { opacity: 0; }
+.sg-card {
+  width: min(560px, 100%); display: flex; flex-direction: column; gap: 14px;
+  padding: 26px 28px; border-radius: 20px;
+  background: var(--surface-1); border: 1px solid var(--line-strong);
+  box-shadow: var(--shadow-2);
+  transform: translateY(10px) scale(0.99);
+  transition: transform 260ms var(--ease);
+}
+.signin-gate.sg-in .sg-card { transform: none; }
+.sg-brand { display: flex; align-items: center; gap: 10px; }
+.sg-brand img { width: 34px; height: 34px; border-radius: 9px; }
+.sg-brand-name { font-size: 15px; font-weight: 800; letter-spacing: 0.2px; }
+.sg-title { font-size: 21px; font-weight: 800; line-height: 1.25; }
+.sg-sub { font-size: 13.5px; color: var(--text-2); line-height: 1.6; }
+.sg-points { display: flex; flex-direction: column; gap: 8px; margin: 2px 0 2px; }
+.sg-point { display: flex; gap: 9px; align-items: flex-start; font-size: 12.5px; color: var(--text-2); line-height: 1.5; }
+.sg-point > svg { color: var(--accent); flex: 0 0 auto; margin-top: 2px; }
+.sg-status {
+  display: inline-flex; align-items: center; gap: 8px; align-self: flex-start;
+  font-size: 12px; font-weight: 700; color: var(--text-3);
+  padding: 5px 11px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--line);
+}
+.sg-status .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--text-3); }
+.sg-status.ok { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 30%, transparent); }
+.sg-status.ok .dot { background: var(--accent); }
+.sg-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.sg-primary { padding: 11px 18px; font-size: 14px; }
+.sg-primary.busy { opacity: 0.8; }
+.sg-spin {
+  width: 15px; height: 15px; border-radius: 50%;
+  border: 2px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  border-top-color: var(--accent); opacity: 0;
+  animation: sg-spin 800ms linear infinite;
+}
+.sg-spin.on { opacity: 1; }
+@keyframes sg-spin { to { transform: rotate(360deg); } }
+body.perf-noanim .sg-spin { animation-duration: 2s; }
+.sg-gamertag { font-size: 12.5px; font-weight: 700; color: var(--accent); }
+.sg-legal { font-size: 11.5px; color: var(--text-3); line-height: 1.55; }
+.sg-browser { font-size: 13px; }
+.sg-browser.highlight { border-color: var(--accent); color: var(--accent); }
+/* "Sign in here" gets pulled back to the eye after a browser-only attempt. */
+.btn.highlight { border-color: var(--accent); color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.btn.primary.highlight { color: var(--accent); }
+.sg-alt { display: flex; align-items: center; gap: 12px; }
+.sg-alt::before { content: ''; flex: 1; height: 1px; background: var(--line); }
+.sg-skip { font-size: 12.5px; color: var(--text-3); }
+.sg-skip:hover { color: var(--text); }
+.sg-hint { font-size: 12px; color: var(--text-3); line-height: 1.5; }

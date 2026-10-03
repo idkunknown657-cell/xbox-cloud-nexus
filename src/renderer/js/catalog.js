@@ -11,6 +11,46 @@ import { icon } from './icons.js';
 import { t } from './i18n.js';
 import { settings, emit } from './store.js';
 import { toastOk, toastInfo } from './toast.js';
+import { accessFor as decide, accountFromSettings } from './entitlements.js';
+
+// ---------- Store artwork ----------
+//
+// Covers are the single biggest cost on the home and library screens: the store
+// serves 2–4 MB originals, and asking for hundreds of them is what makes
+// thumbnails feel slow. Microsoft's image host accepts resize/format hints, so
+// every cover is requested once, at roughly the size it is painted at, and only
+// when it scrolls into view.
+const ART_WIDTH = { tiny: 180, card: 300, wide: 640, hero: 1280 };
+const artCache = new Map();
+
+/**
+ * Rewrite a store image URL to the size we actually paint.
+ * Unknown hosts are returned untouched so a change on Microsoft's side can
+ * never break the covers entirely.
+ */
+export function sizedArt(url, width, format = 'jpg') {
+  if (!url) return null;
+  const key = `${url}|${width}|${format}`;
+  const hit = artCache.get(key);
+  if (hit !== undefined) return hit;
+  let out = url;
+  try {
+    const u = new URL(url);
+    if (/(^|\.)xboxlive\.com$/.test(u.hostname) || /(^|\.)microsoft\.com$/.test(u.hostname)) {
+      if (width) u.searchParams.set('w', String(width));
+      if (/images-eds/i.test(u.hostname)) {
+        u.searchParams.set('format', format);
+        u.searchParams.set('q', '78');
+        u.searchParams.set('h', String(Math.round(width * 1.5)));
+      } else {
+        u.searchParams.set('q', '78');
+      }
+    }
+    out = u.toString();
+  } catch { /* keep the original URL */ }
+  artCache.set(key, out);
+  return out;
+}
 
 // ---------- Shared lazy image observer ----------
 let imgObserver = null;
@@ -23,19 +63,34 @@ function observer() {
       imgObserver.unobserve(img);
       const src = img.dataset.src;
       if (!src) continue;
-      img.src = src;
-      img.addEventListener('load', () => img.classList.add('loaded'), { once: true });
+      // The hint must be cleared before src is set, otherwise the browser keeps
+      // painting the placeholder while the real cover downloads.
+      img.removeAttribute('data-src');
+      img.addEventListener('load', () => { img.classList.add('loaded'); img.classList.remove('art-pending'); }, { once: true });
       img.addEventListener('error', () => { img.classList.add('art-fallback'); img.removeAttribute('src'); }, { once: true });
+      img.src = src;
     }
-  }, { rootMargin: '400px 0px' });
+  }, { rootMargin: '600px 0px', threshold: 0.01 });
   return imgObserver;
 }
 
-/** Mark an <img> for lazy loading (avoids decoding hundreds of covers at once). */
-function lazyImg(src, alt, cls = 'art') {
-  const img = h(`img.${cls}`, { alt: alt || '', decoding: 'async', draggable: false });
-  if (src) {
-    img.dataset.src = src;
+/**
+ * Mark an <img> for lazy loading (avoids decoding hundreds of covers at once).
+ * Width/height are set before the source so the browser reserves the box and
+ * the grid never reflows as covers arrive — that reflow is the "laggy" bit.
+ */
+function lazyImg(src, alt, cls = 'art', width = ART_WIDTH.card) {
+  const img = h(`img.${cls}`, {
+    alt: alt || '',
+    decoding: 'async',
+    loading: 'lazy',
+    draggable: false,
+    width: String(width),
+    height: String(Math.round(width * 1.5)),
+  });
+  const full = src ? sizedArt(src, width) : null;
+  if (full) {
+    img.dataset.src = full;
     observer().observe(img);
   } else {
     img.classList.add('art-fallback');
@@ -183,6 +238,28 @@ export const hasAds = (id) => (state.lists.freeWithAds?.ids || []).includes(id);
 export const hasKbm = (id) => (state.lists.playWithMkb?.ids || []).includes(id);
 export const isGamePass = (id) => (state.lists.all?.ids || []).includes(id);
 
+/**
+ * What this account may do with a game, given the signed-in state and plan.
+ *
+ * @param {string|object} game product id or summary
+ * @returns {{state:string, label:string, reason:string, play:boolean, tag:string|null}}
+ */
+export function accessFor(game) {
+  const id = typeof game === 'string' ? game : (game && game.id) || '';
+  const p = typeof game === 'string' ? get(id) : game;
+  // Bound on purpose: settings.get() is a method that reads the store, and an
+  // unbound copy throws the moment a card is painted.
+  const account = accountFromSettings((k, d) => settings.get(k, d));
+  return decide({ ...(p || { id }), access: (p && p.access) || null }, {
+    ads: hasAds(id),
+    signedIn: account.signedIn,
+    plan: account.plan,
+    // 'auto' means the page has not been read yet; treat it as unknown rather
+    // than assuming the worst and hiding a game the account can play.
+    planKnown: account.planSource === 'detected',
+  });
+}
+
 // ---------- User collections (mirrored in settings) ----------
 export const favorites = () => settings.get('favorites', []) || [];
 export const hidden = () => settings.get('hiddenGames', []) || [];
@@ -258,7 +335,8 @@ export function sortGames(items, sortKey) {
 // ---------- Card builders ----------
 function badgesFor(id) {
   const out = [];
-  if (hasAds(id)) out.push({ label: 'ADS', cls: 'accent' });
+  const a = accessFor(id);
+  if (a.tag) out.push({ label: a.tag, cls: a.state === 'ads' ? 'accent' : (a.state === 'requiresSubscription' ? 'locked' : 'plan') });
   if (isFav(id)) out.push({ label: '★', cls: '' });
   return out;
 }
@@ -392,12 +470,15 @@ export function logoArt(p) { return p?.art?.logo || null; }
 export function portraitArt(p) { return p?.art?.portrait || p?.art?.tile || null; }
 
 /** Full-bleed background image element with a load fade. */
-export function bgImage(src, cls = 'hero-bg') {
-  const el = h(`div.${cls}`, { style: src ? { backgroundImage: `url("${src}")` } : {} });
-  if (src) {
+export function bgImage(src, cls = 'hero-bg', width = ART_WIDTH.hero) {
+  const sized = src ? sizedArt(src, width) : null;
+  const el = h(`div.${cls}`, { style: sized ? { backgroundImage: `url("${sized}")` } : {} });
+  if (sized) {
+    // Reveal only once the bytes are here: a half-loaded backdrop looks worse
+    // than the gradient that is already behind it.
     const probe = new Image();
     probe.onload = () => el.classList.add('loaded');
-    probe.src = src;
+    probe.src = sized;
   }
   return el;
 }

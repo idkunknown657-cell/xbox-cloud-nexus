@@ -18,6 +18,7 @@ import { toastOk } from './toast.js';
 import { sfx } from './sfx.js';
 import { dropdown, slider, toggle } from './ui-kit.js';
 import { portraitArt } from './catalog.js';
+import * as cat from './catalog.js';
 import { profiles, configureControlsForGame, mouseSettingsOf, patchProfileMouse } from './views/controls.js';
 
 const RESOLUTIONS = [
@@ -143,6 +144,8 @@ export async function openLaunchPanel(game, ctx) {
   }
 
   const driveChip = h('span.status-chip', [h('span.dot'), mouseOn ? 'Mouse → right stick' : 'Mouse buttons only']);
+  const adSupported = cat.hasAds(game.id);
+  const access = cat.accessFor(game);
 
   body.append(
     h('div.lp-head', [
@@ -152,6 +155,17 @@ export async function openLaunchPanel(game, ctx) {
         h('div.r-desc', 'Keyboard & mouse works on every cloud game, including controller-only titles.'),
       ]),
     ].filter(Boolean)),
+    // Free-with-ads titles are paid for by an Xbox-served pre-roll. Say so up
+    // front: the ad plays inside the game window and is not ours to skip.
+    adSupported ? h('div.lp-adrow', [icon('ads', { size: 15 }), h('span', 'Free with ads — Xbox plays a short ad in the game window before your session starts. It is what makes this title free, so let it finish.')]) : null,
+    // What this account may actually do with the title, in plain words.
+    h(`div.lp-access${access.play === false ? '.blocked' : ''}`, [
+      icon(access.play === false ? 'lock' : 'badge', { size: 15 }),
+      h('div.grow', [
+        h('div.lp-access-title', access.play === false ? access.label : (access.state === 'ads' ? 'Play with Ads' : access.label)),
+        h('div.r-desc', access.reason),
+      ]),
+    ]),
     h('div.lp-group', [h('div.lp-group-title', 'Controls profile'), profileDd]),
     h('div.lp-group', [h('div.lp-group-title', 'Input'), modeBar, driveChip]),
     h('div.lp-group', controlsHost),

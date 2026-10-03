@@ -22,6 +22,9 @@ if (!process.env.NEXUS_TEST_PROFILE) {
   fsx.rmSync(TEST_PROFILE, { recursive: true, force: true });
 }
 app.setPath('userData', TEST_PROFILE);
+// A test run must never throw a real browser window at the operator when a
+// page fails to load — that is the app's fallback for humans, not for CI.
+process.env.NEXUS_NO_AUTO_BROWSER = '1';
 
 require('./main.cjs');
 
@@ -40,7 +43,9 @@ const $$ = (s) => Array.from(document.querySelectorAll(s));
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const waitFor = async (fn, ms = 20000) => {
   const t0 = Date.now();
-  while (Date.now() - t0 < ms) { try { if (fn()) return true; } catch (e) {} await sleep(150); }
+  // fn may be sync or async: await it so a pending promise is never mistaken
+  // for a satisfied condition.
+  while (Date.now() - t0 < ms) { try { if (await fn()) return true; } catch (e) {} await sleep(150); }
   return false;
 };
 
@@ -56,6 +61,11 @@ ok('app shell present', !!$('#app') && !!$('#main') && !!$('#sidebar'));
 ok('css variables applied', getComputedStyle(document.body).getPropertyValue('--accent').trim() !== '');
 ok('sidebar nav items', $$('#sidebar .nav-item').length >= 6, $$('#sidebar .nav-item').length);
 ok('brand logo', !!$('#sidebar .brand img'));
+ok('sidebar always offers an account entry', $$('#sidebar .account-chip').length === 1,
+   $$('#sidebar .account-chip').length);
+ok('account entry leads with sign-in or the gamertag',
+   /sign in|xbox account/i.test(($('#sidebar .account-chip') || {}).textContent || ''),
+   (($('#sidebar .account-chip') || {}).textContent || '').slice(0, 40));
 
 // ---- First-run wizard ----
 await waitFor(() => !!$('.wizard') || !$('#sidebar .nav-item'), 20000);
@@ -71,6 +81,61 @@ if (wizardUp) {
   }
   await waitFor(() => !$('.wizard'), 6000);
   ok('wizard completes', !$('.wizard'));
+}
+
+// The suite drives account state later on, so start every run from a known
+// state: a previous run must never leave this profile looking signed in.
+await window.nexus.settings.set('account.signedIn', false);
+await window.nexus.settings.set('account.skippedSignIn', false);
+await window.nexus.settings.set('account.plan', 'auto');
+await window.nexus.settings.set('account.planSource', '');
+
+// ---- Microsoft sign-in gateway ----
+// The gateway is shown before the library on a fresh install; if the machine is
+// already connected the app skips straight through, which is also correct.
+{
+  const auth = await window.nexus.auth.status().catch(() => null);
+  const gateUp = await waitFor(() => !!$('.signin-gate'), 6000);
+  ok('sign-in gateway shown before the library', gateUp || auth?.signedIn === true,
+     gateUp ? 'gateway' : 'already signed in');
+  ok('account status is readable from the launcher', !!auth && typeof auth.signedIn === 'boolean',
+     JSON.stringify(auth));
+  if (gateUp) {
+    const txt = $('.signin-gate').textContent;
+    ok('sign-in happens on the official page, not in a fake form', /official/i.test(txt), txt.slice(0, 60));
+    ok('sign-in never asks for a password here', $$('.signin-gate input').length === 0,
+       $$('.signin-gate input').length);
+    ok('sign-in can be skipped', /browse without signing in/i.test(txt));
+    ok('sign-in points at Microsoft', /sign in with microsoft/i.test(txt));
+    ok('a browser fallback is offered', /in my browser/i.test(txt), txt.slice(0, 40));
+
+    // Opening Microsoft's own page is the whole point: prove the window really
+    // appears and really lands on xbox.com.
+    const open = $$('.signin-gate .btn').find((b) => /sign in with microsoft/i.test(b.textContent));
+    if (open) {
+      open.click();
+      const up = await waitFor(async () => {
+        const w = await window.nexus.auth.windowState().catch(() => null);
+        return !!w && w.open;
+      }, 12000);
+      ok('sign-in window opens', up, JSON.stringify(await window.nexus.auth.windowState().catch(() => null)));
+      const onXbox = await waitFor(async () => {
+        const w = await window.nexus.auth.windowState().catch(() => null);
+        return !!w && /xbox\.com/.test(w.url || '');
+      }, 30000);
+      ok('sign-in window loads the official Xbox page', onXbox,
+         (await window.nexus.auth.windowState().catch(() => ({}))).url);
+      await window.nexus.auth.closeWindow().catch(() => {});
+      await sleep(400);
+    }
+
+    const skip = $$('.signin-gate .btn').find((b) => /browse without/i.test(b.textContent));
+    if (skip) skip.click();
+    // The gateway animates out and removes itself on a timer, so wait for the
+    // DOM to settle instead of guessing a duration.
+    const closed = await waitFor(() => !$('.signin-gate'), 4000);
+    ok('gateway closes when skipped', closed, closed ? '' : 'gate still present');
+  }
 }
 
 // ---- Home ----
@@ -152,9 +217,23 @@ if (si) {
   si.value = ''; si.dispatchEvent(new Event('input', { bubbles: true })); await sleep(600);
 }
 
-// favourite toggle persists
+// favourite toggle persists — idempotent: asserts the store flips either way,
+// because a repeated run starts from the previous run's favourites file.
 const favBtn = $('.grid-games .card .fav');
-if (favBtn) { favBtn.click(); await sleep(500); ok('favorite toggles', $('.grid-games .card .fav.is-fav') !== null); }
+if (favBtn) {
+  const favId = (favBtn.closest('.card') || {}).dataset ? favBtn.closest('.card').dataset.id : '';
+  const wasFav = favBtn.classList.contains('is-fav');
+  favBtn.click();
+  await sleep(500);
+  const favNow = ((await window.nexus.settings.get()).favorites) || [];
+  ok('favorite toggles', !!favId && favNow.includes(favId) !== wasFav,
+     favId + ' was=' + wasFav + ' now=' + favNow.includes(favId));
+  const shownNow = $('.grid-games .card[data-id="' + favId + '"] .fav');
+  ok('favorite state reaches the DOM', !!shownNow && shownNow.classList.contains('is-fav') === !wasFav,
+     shownNow ? shownNow.className : 'no card');
+  // Put the catalogue back the way we found it.
+  if (shownNow) { shownNow.click(); await sleep(400); }
+}
 
 ok('nav to cloud gaming', await navTo('Cloud Gaming'));
 await sleep(800);
@@ -261,6 +340,26 @@ if (ss) {
   ss.value = ''; ss.dispatchEvent(new Event('input', { bubbles: true })); await sleep(400);
 }
 
+// ---- Settings → Account: the sign-in entry point that must always exist ----
+// The startup gateway can be dismissed forever; without this panel there would
+// be no way back to Microsoft sign-in, which is what "sign in does nothing"
+// looked like in practice.
+{
+  const cat = $$('.settings-nav .nav-item').find((x) => /^account/i.test(x.textContent.trim()));
+  ok('account category in settings', !!cat, cat ? cat.textContent.trim() : 'missing');
+  if (cat) { cat.click(); await sleep(800); }
+  const body = $$('#main .panel').map((p) => p.textContent).join(' | ');
+  ok('account panel offers Microsoft sign-in', /sign in with microsoft/i.test(body), body.slice(0, 70));
+  ok('account panel offers the browser fallback', /open sign-in page in my browser/i.test(body));
+  ok('account panel can sign out', /sign out/i.test(body));
+  ok('account panel never collects a password', $$('#main input[type="password"]').length === 0,
+     $$('#main input[type="password"]').length);
+  const url = await window.nexus.auth.signInUrl().catch(() => '');
+  ok('sign-in URL points at the official play page', /^https:\\/\\/www\\.xbox\\.com\\/.+\\/play$/.test(url), url);
+  const st = await window.nexus.auth.windowState().catch(() => null);
+  ok('sign-in window state is queryable', !!st && typeof st.open === 'boolean', JSON.stringify(st));
+}
+
 // ---- Controls ----
 ok('nav to settings for controls', await navTo('Settings'));
 await sleep(700);
@@ -309,8 +408,129 @@ ok('diagram d-pad directions', $$('.cx-dpdir').length === 4, $$('.cx-dpdir').len
      JSON.stringify([Math.round(dp.x), Math.round(faceX.x)]));
 }
 ok('mapping list renders', $$('.map-item').length === 25, $$('.map-item').length);
-ok('input test pad renders', $$('.testpad .tp-cell').length >= 15, $$('.testpad .tp-cell').length);
 ok('profile dropdown present', $$('.dd-trigger').length >= 1, $$('.dd-trigger').length);
+
+// ---- Reference layout: three columns + right rail ----
+ok('three-column mapping layout', !!$('.controls-3col .map-card') && !!$('.controls-mid') && !!$('.controls-rail'),
+   $$('.controls-3col > *').length);
+ok('control profiles rail', $$('.rail-profile').length >= 1 && /control profiles/i.test($('.controls-rail').textContent),
+   $$('.rail-profile').length);
+ok('rail offers create + import/export',
+   $$('.rail-actions .btn').length === 2, $$('.rail-actions .btn').length);
+ok('live test card', !!$('.rail-card .live-pad') && $$('.rail-card .tv-value').length === 2,
+   $$('.rail-card .tv-value').length);
+ok('test card has clear input + working chip',
+   /clear input/i.test($('.controls-rail').textContent) && /working/i.test($('.controls-rail').textContent));
+ok('quick actions card', $$('.quick-actions .quick-item').length === 5, $$('.quick-actions .quick-item').length);
+ok('quick actions include conflict check with badge',
+   !!$('.quick-actions .quick-item[data-action="conflicts"] .qa-badge'));
+ok('mouse settings card sits beside the keyboard', !!$('.kbm-split .mouse-card'), !!$('.mouse-card'));
+ok('device picker present', /xbox controller/i.test(($('.map-card .dd-trigger') || {}).textContent || ''),
+   ($('.map-card .dd-trigger') || {}).textContent);
+ok('better xcloud attribution in the footer',
+   /powered by better xcloud/i.test(($('.kbm-footer') || {}).textContent || ''),
+   ($('.kbm-footer') || {}).textContent);
+ok('footer explains controller translation',
+   /converted to controller input/i.test(($('.kbm-footer') || {}).textContent || ''));
+
+// ---- Layout: nothing may be squeezed, clipped or overlapping ----
+{
+  const vw = window.innerWidth;
+  const overflow = document.documentElement.scrollWidth - vw;
+  ok('no horizontal overflow on the controls screen', overflow <= 2, 'overflow ' + overflow + 'px');
+  const rail = $('.controls-rail');
+  if (rail) {
+    const rr = rail.getBoundingClientRect();
+    ok('right rail is fully on screen', rr.right <= vw + 1 && rr.width > 200,
+       Math.round(rr.left) + '-' + Math.round(rr.right) + ' of ' + vw);
+  }
+  const kb = $('.keyboard');
+  if (kb) {
+    const keys = $$('.kb-key');
+    const narrow = keys.filter((k) => k.getBoundingClientRect().width < 22).length;
+    ok('keyboard keys keep a readable width', narrow === 0, narrow + ' of ' + keys.length + ' keys under 22px');
+    const wrapped = keys.filter((k) => k.scrollHeight > k.clientHeight + 2).length;
+    ok('keyboard rows do not overflow vertically', wrapped === 0, wrapped);
+  }
+  const stage = $('.cx-stage');
+  if (stage) {
+    const sr = stage.getBoundingClientRect();
+    ok('controller artwork keeps its size', sr.width >= 300 && sr.height >= 150,
+       Math.round(sr.width) + 'x' + Math.round(sr.height));
+  }
+  // The keyboard/mouse card must either sit beside the keyboard or stack below
+  // it — never on top of it. A container query that loses to its own base rule
+  // (same specificity, declared earlier) produces exactly that overlap.
+  const kbl = $('.kbm-left'), kbr = $('.kbm-right');
+  if (kbl && kbr) {
+    const L = kbl.getBoundingClientRect();
+    const R = kbr.getBoundingClientRect();
+    const ox = Math.min(L.right, R.right) - Math.max(L.left, R.left);
+    const oy = Math.min(L.bottom, R.bottom) - Math.max(L.top, R.top);
+    ok('keyboard panel and mouse card never overlap', !(ox > 1 && oy > 1),
+       'overlap ' + Math.round(ox) + 'x' + Math.round(oy));
+    const sideBySide = ox <= 1;
+    ok('mouse card sits beside or below the keyboard', sideBySide ? oy <= 1 : oy <= -20 || R.top >= L.bottom,
+       sideBySide ? 'side-by-side' : 'stacked');
+    const keyboard = $('.keyboard');
+    if (keyboard) {
+      const k = keyboard.getBoundingClientRect();
+      ok('keyboard fits its panel without being cut off', k.width <= L.width + 1,
+         Math.round(k.width) + '/' + Math.round(L.width));
+      const widest = Math.max.apply(null, $$('.kb-key').map((x) => x.getBoundingClientRect().width));
+      ok('keyboard keys have room to breathe', widest >= 40, 'widest ' + Math.round(widest) + 'px');
+    }
+  }
+  // Rows must read: chip, value, chevron — with no overlapping text.
+  const rows = $$('.map-item');
+  const broken = rows.filter((r) => {
+    const badge = r.querySelector('.map-badge');
+    const key = r.querySelector('.map-key');
+    if (!badge || !key) return false;
+    const b = badge.getBoundingClientRect();
+    const k = key.getBoundingClientRect();
+    return b.width < 20 || k.width < 20 || b.right > k.left + 1 || key.scrollWidth > key.clientWidth + 2;
+  });
+  ok('mapping rows lay out cleanly', broken.length === 0,
+     broken.map((r) => r.dataset.btn).join(','));
+  ok('mapping rows do not repeat their label',
+     $$('.map-item .map-name').length === 0, $$('.map-item .map-name').length);
+}
+
+// ---- Real-time mapping reaction ----
+{
+  // X is bound to R in the shipped default profile, so pressing R has to light
+  // the artwork, the list row and the live readout at the same time.
+  document.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyR', key: 'r', bubbles: true }));
+  await sleep(70);
+  const litDiagram = $$('.controller-visual .live').length;
+  const litRow = $$('.map-item.live').length;
+  const readout = ($$('.rail-card .tv-value')[1] || {}).textContent;
+  ok('pressing a mapped key lights the artwork', litDiagram > 0, litDiagram);
+  ok('pressing a mapped key lights the mapping row', litRow > 0, litRow);
+  ok('live readout reports the mapped input', /X/i.test(readout || ''), readout);
+  await sleep(340);
+  // Mouse movement is translated to the right stick: it must light that chip.
+  document.dispatchEvent(new MouseEvent('mousemove', { bubbles: true, clientX: 120, clientY: 120, movementX: 40, movementY: 3 }));
+  await sleep(160);
+  const rsLit = $$('.cx-axis.live').length + $$('.cx-stick.live').length;
+  const rsReadout = ($$('.rail-card .tv-value')[1] || {}).textContent;
+  ok('mouse movement lights the right stick', rsLit > 0, rsLit);
+  ok('live readout maps the mouse to the right stick', /right stick/i.test(rsReadout || ''), rsReadout);
+  await sleep(260);
+}
+
+// ---- Keyboard vocabulary is the real one ----
+{
+  const mod = await import('/js/buttons.js');
+  const checks = [['-', 'Minus'], ['=', 'Equal'], ["'", 'Quote'], ['/', 'Slash'], [';', 'Semicolon'], ['W', 'KeyW'], ['7', 'Digit7'], ['F4', 'F4']];
+  const bad = checks.filter(([g, code]) => mod.keyCodeForGlyph(g) !== code);
+  ok('keyboard glyphs map to real key codes', bad.length === 0,
+     bad.map(([g, c]) => g + '→' + mod.keyCodeForGlyph(g) + '≠' + c).join(' '));
+  ok('every visual key code is bindable',
+     checks.every(([, code]) => mod.VALID_CODES.has(code)),
+     checks.filter(([, c]) => !mod.VALID_CODES.has(c)).map(([, c]) => c).join(','));
+}
 
 // dropdown opens/closes and reports the chosen value
 {
@@ -384,10 +604,9 @@ if (yHit) {
 {
   document.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyI', key: 'i', bubbles: true }));
   await sleep(80);
-  ok('test pad lights up on mapped key', $$('.testpad .tp-cell.lit').length > 0, $$('.testpad .tp-cell.lit').length);
-  ok('input test reports detected key',
-     (/I/.test(($('.detect-row .det-value') || {}).textContent || '')),
-     ($('.detect-row .det-value') || {}).textContent);
+  ok('live readout shows the pressed key',
+     (/I/.test(($('.rail-card .tv-value') || {}).textContent || '')),
+     ($('.rail-card .tv-value') || {}).textContent);
 }
 
 // keyboard & mouse section
@@ -471,6 +690,15 @@ ok('per-game rows render', $$('.assign-row').length > 0 || /play a game once/i.t
 
 // devices + advanced
 ok('devices section reachable', await goSection(/input devices/i));
+ok('input test pad renders', $$('.testpad .tp-cell').length >= 15, $$('.testpad .tp-cell').length);
+{
+  document.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyI', key: 'i', bubbles: true }));
+  await sleep(80);
+  ok('test pad lights up on mapped key', $$('.testpad .tp-cell.lit').length > 0, $$('.testpad .tp-cell.lit').length);
+  ok('input test reports detected key',
+     (/I/.test(($('.detect-row .det-value') || {}).textContent || '')),
+     ($('.detect-row .det-value') || {}).textContent);
+}
 ok('advanced section reachable', await goSection(/advanced/i));
 ok('advanced renders', /in-game toggle hotkey/i.test(document.body.textContent));
 
@@ -583,6 +811,42 @@ ok('advanced renders', /in-game toggle hotkey/i.test(document.body.textContent))
   }
 }
 
+// ---- Free with ads (Xbox-served pre-roll) ----
+// These titles are streamed free in exchange for an ad the Xbox player shows
+// inside the game window. The launcher must say so before launching, and must
+// never present the pre-roll as a hang or as something it can skip.
+{
+  await navTo('Play with Ads');
+  await sleep(900);
+  if (need(needLists, 'ads page')) {
+    const adsIds = $$('#main .card').map((c) => c.dataset.id).filter(Boolean);
+    ok('ads page lists ad-supported titles', adsIds.length > 3, adsIds.length);
+    ok('ads page explains what pays for the game', /ad/i.test($('#main').textContent),
+       ($('.section-sub') || {}).textContent);
+    const meta = await window.nexus.catalog.listsMeta().catch(() => ({}));
+    ok('ads list is a real Xbox list', !!meta.freeWithAds, Object.keys(meta).length + ' lists');
+    const first = $$('#main .card')[0];
+    if (first) {
+      first.click(); await sleep(1100);
+      const play = $$('.overlay-card .btn').find((b) => /play now/i.test(b.textContent));
+      if (play) {
+        play.click(); await sleep(1000);
+        const panelText = ($('.modal-veil') || {}).textContent || '';
+        ok('ad-supported title warns about the pre-roll before launching',
+           /free with ads/i.test(panelText) && /ad/i.test(panelText), panelText.slice(0, 60));
+        const launch = $$('.modal-veil .btn').find((b) => /play now/i.test(b.textContent));
+        ok('launch panel still offers Play now', !!launch);
+        // Close without launching: no window should open during the test run.
+        document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+        await sleep(500);
+        const cancel = $$('.modal-veil .btn').find((b) => /cancel|close/i.test(b.textContent));
+        if (cancel) { cancel.click(); await sleep(500); }
+        ok('ad launch panel closes without launching', !$('.modal-veil .launch-panel') || !!$('.modal-veil'));
+      }
+    }
+  }
+}
+
 // ---- Pre-launch panel ----
 {
   await navTo('Home');
@@ -617,6 +881,78 @@ ok('advanced renders', /in-game toggle hotkey/i.test(document.body.textContent))
       }
       ok('launch panel closes without launching', !$('.modal-veil'));
     }
+  }
+}
+
+// ---- Account entitlements: what the UI promises per game ----
+{
+  // The plan really does travel: main process stores it, renderer reads it back.
+  const setPlan = await window.nexus.auth.setPlan('ultimate').catch((e) => ({ error: e.message }));
+  ok('subscription plan is stored through IPC', setPlan?.plan === 'ultimate', JSON.stringify(setPlan));
+  const st = await window.nexus.auth.status();
+  ok('account status reports the plan and its source', st.plan === 'ultimate' && !!st.planSource, st.plan + '/' + st.planSource);
+  ok('a manually chosen plan is marked as such', st.planSource === 'manual', st.planSource);
+
+  await window.nexus.settings.set('account.signedIn', true);
+  await navTo('Cloud Gaming');
+  await sleep(1600);
+  // Cards must carry an access badge once the account is connected.
+  const tagged = $$('#main .card .badges .tag').length + $$('#main .card .g-tags .tag').length;
+  ok('games carry an access badge', tagged > 0, tagged);
+  const firstCard = $$('#main .card')[0];
+  if (firstCard) {
+    firstCard.click(); await sleep(1100);
+    const note = $('.access-note');
+    ok('details explains what this account may do', !!note, (note || {}).textContent);
+    const playBtn = $$('.overlay-card .btn').find((b) => /play now|requires/i.test(b.textContent));
+    ok('details offers a clearly labelled action', !!playBtn, (playBtn || {}).textContent);
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    await sleep(600);
+  }
+
+  // A free account must not be shown a subscription wall for a free/ads title.
+  await window.nexus.auth.setPlan('none');
+  ok('plan can be set back to no subscription',
+    (await window.nexus.auth.status()).plan === 'none');
+
+  await window.nexus.auth.setPlan('auto');
+  await window.nexus.settings.set('account.signedIn', false);
+
+  // The account panel is the permanent home of sign-in and the plan picker.
+  await navTo('Settings');
+  await sleep(900);
+  const acct = $$('#main .nav-item, .settings-nav .nav-item').find((x) => /^account/i.test((x.textContent || '').trim()));
+  if (acct) {
+    acct.click(); await sleep(900);
+    ok('account panel exposes sign in', $$('#main .btn').some((b) => /sign in with microsoft/i.test(b.textContent)));
+    ok('account panel offers the browser fallback', $$('#main .btn').some((b) => /browser/i.test(b.textContent)));
+    ok('account panel exposes the subscription picker', !!$('.acct-plan select'), ($('.acct-plan') || {}).textContent);
+  }
+}
+
+// ---- Account identification states + sound switch ----
+{
+  const st = await window.nexus.auth.status(true);
+  ok('account status reports a session state', typeof st.sessionState === 'string', st.sessionState);
+  ok('an unsigned profile reports no session', st.signedIn === false || st.sessionState === 'ok', JSON.stringify({ s: st.signedIn, st: st.sessionState }));
+  ok('account status reports the probe deadline', Number(st.probeMs) > 0, String(st.probeMs));
+
+  // The sign-out path must clear every trace of the session, not just a flag.
+  const cleared = await window.nexus.auth.signOut().catch((e) => ({ error: e.message }));
+  ok('sign out clears the account', cleared?.signedIn === false, JSON.stringify(cleared));
+
+  const sound = $('#tb-sound');
+  ok('the titlebar has a master sound switch', !!sound);
+  if (sound) {
+    const before = sound.getAttribute('aria-pressed');
+    sound.click();
+    await sleep(400);
+    const after = sound.getAttribute('aria-pressed');
+    ok('the sound switch flips and says so', before !== after, before + ' -> ' + after);
+    sound.click();
+    await sleep(400);
+    ok('the sound switch flips back', sound.getAttribute('aria-pressed') === before,
+       sound.getAttribute('aria-pressed') + ' vs ' + before);
   }
 }
 

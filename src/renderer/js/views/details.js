@@ -134,6 +134,7 @@ export function openDetails(game) {
     clear(content);
     const fav = cat.isFav(p.id);
     const ads = cat.hasAds(p.id);
+    const access = cat.accessFor(p);
 
     const poster = cat.portraitArt(p);
     const logo = cat.logoArt(p);
@@ -141,23 +142,42 @@ export function openDetails(game) {
     content.appendChild(h('div.details-hero', [
       cat.bgImage(cat.heroArt(p), 'dh-bg'),
       h('div.dh-content', [
-        poster ? h('img.dh-poster', { src: poster, alt: p.title, loading: 'lazy' }) : h('div.dh-poster.dh-poster-fallback', (p.title || '?').slice(0, 2).toUpperCase()),
+        poster
+          ? h('img.dh-poster', { src: cat.sizedArt(poster, 360), alt: p.title, loading: 'lazy', decoding: 'async', width: '360', height: '540' })
+          : h('div.dh-poster.dh-poster-fallback', (p.title || '?').slice(0, 2).toUpperCase()),
         h('div.grow', [
-          logo ? h('img.dh-logo', { src: logo, alt: '', loading: 'lazy' }) : null,
+          logo ? h('img.dh-logo', { src: cat.sizedArt(logo, 520, 'png'), alt: '', loading: 'lazy', decoding: 'async' }) : null,
           h('h1.dh-title', p.title),
           h('div.dh-meta', [
             p.publisher ? h('span', p.publisher) : null,
             cat.isGamePass(p.id) ? h('span.tag.accent', t('game_pass')) : null,
             ads ? h('span.tag', t('play_with_ads_badge')) : null,
             cat.hasKbm(p.id) ? h('span.tag', t('kbm_supported')) : null,
+            access.tag ? h(`span.tag${access.state === 'requiresSubscription' ? '.locked' : '.plan'}`, access.tag) : null,
           ].filter(Boolean)),
+          access.reason ? h(`div.access-note${access.play === false ? '.blocked' : ''}`, [
+            icon(access.play === false ? 'lock' : 'info', { size: 14 }),
+            h('span', access.play === false ? access.label : access.reason),
+            access.play === false && !settings.get('account.signedIn', false)
+              ? h('button.linkbtn', {
+                onclick: async () => {
+                  const { showSignInGate } = await import('./signin.js');
+                  overlayApi?.close();
+                  showSignInGate({ onDone: () => { paint(content, p); } });
+                },
+              }, t('sign_in'))
+              : null,
+          ].filter(Boolean)) : null,
           h('div.hero-actions', [
-            h('button.btn.primary.lg', {
+            h(`button.btn.primary.lg${access.play === false ? '.disabled' : ''}`, {
+              disabled: access.play === false,
+              title: access.play === false ? access.reason : '',
               onclick: async () => {
+                if (access.play === false) return;
                 overlayApi?.close();
                 await openLaunchPanel(p, { navigate: go });
               },
-            }, icon('play', { size: 15 }), t('play_now')),
+            }, icon(access.play === false ? 'lock' : 'play', { size: 15 }), access.play === false ? access.label : t('play_now')),
             h('button.btn.lg', {
               onclick: () => { overlayApi?.close(); launchGame(p); },
             }, [icon('play', { size: 15 }), t('quick_play')]),

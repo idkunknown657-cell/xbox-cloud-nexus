@@ -12,6 +12,7 @@
 const fs = require('fs');
 const path = require('path');
 const https = require('https');
+const { readProductAccess } = require('./entitlements.cjs');
 
 const LIST_IDS = {
   all: 'af206485-e87d-4624-9007-cb7f6d0cc42e',
@@ -227,6 +228,10 @@ class Catalog {
             long: lp.DetailedDescription || '',
             developer: lp.DeveloperName || '',
             publisher: lp.PublisherName || '',
+            // Entitlement facts for this market, straight from Microsoft's payload.
+            // The UI combines these with the account's plan to decide what it may
+            // honestly offer (see main/entitlements.cjs).
+            access: readProductAccess(P),
             art: {
               portrait: pick('BoxArt', 'Poster', 'Portrait') || anyImage,
               tile: pick('SuperHero', 'Hero', 'Logo') || anyImage,

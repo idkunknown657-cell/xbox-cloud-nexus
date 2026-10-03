@@ -8,9 +8,9 @@
  */
 import { settings } from './store.js';
 import { t } from './i18n.js';
-import { toastInfo, toastErr, toastOk } from './toast.js';
+import { toastInfo, toastErr, toastOk, toastWarn } from './toast.js';
 import { sfx } from './sfx.js';
-import { isHidden } from './catalog.js';
+import { isHidden, hasAds, accessFor } from './catalog.js';
 
 const inflight = new Map();
 
@@ -31,11 +31,27 @@ export async function launchGame(game) {
   if (!game?.id) return false;
   if (inflight.has(game.id)) return inflight.get(game.id);
 
+  // The one place a launch is allowed or refused. Anything that can start a game
+  // routes through here, so an account without the entitlement gets an honest
+  // explanation instead of a stream window that dies on Xbox's own paywall.
+  const access = accessFor(game);
+  if (access && access.play === false) {
+    toastWarn(t('not_included'), access.reason || '');
+    return false;
+  }
+
   const task = (async () => {
     try {
       toastInfo(t('launching'), game.title || '');
       sfx('launch');
-      const res = await window.nexus.launch({ productId: game.id, title: game.title || '' });
+      // Free-with-ads titles get an Xbox-served pre-roll inside the official
+      // player. The stream window needs to know so it can tell the player why
+      // the game has not started yet.
+      const res = await window.nexus.launch({
+        productId: game.id,
+        title: game.title || '',
+        adSupported: hasAds(game.id),
+      });
       if (res?.reused) toastInfo(t('launched'), game.title || '');
       else toastOk(t('launched'), game.title || '');
       // Reflect the launch immediately in this window's recents.

@@ -12,7 +12,7 @@ import { icon } from './icons.js';
 import { t, setLang, getLang } from './i18n.js';
 import { settings, on, emit } from './store.js';
 import { applyTheme } from './theme.js';
-import { unlockAudio } from './sfx.js';
+import { unlockAudio, sfx } from './sfx.js';
 import { initGamepad } from './gamepad.js';
 import * as cat from './catalog.js';
 import { toastOk, toastInfo, toastWarn, toastErr } from './toast.js';
@@ -21,10 +21,11 @@ import { launchGame, markStreamOpen, markStreamClosed } from './launch.js';
 import { render as renderHome } from './views/home.js';
 import { createView as createLibraryView } from './views/library.js';
 import { openDetails } from './views/details.js';
-import { createView as createSettingsView } from './views/settings.js';
+import { createView as createSettingsView, setStartCategory } from './views/settings.js';
 import { createView as createControlsView } from './views/controls.js';
 import { openPalette } from './views/search.js';
 import { runWizard } from './views/wizard.js';
+import { showSignInGate } from './views/signin.js';
 
 const main = $('#main');
 const sidebar = $('#sidebar');
@@ -92,6 +93,7 @@ function paint() {
   }
   const view = route.view(ctx);
   if (pendingSettingsCategory && current === 'settings') {
+    setStartCategory(pendingSettingsCategory);
     pendingSettingsCategory = null;
   }
   teardown = view.render(main);
@@ -131,6 +133,22 @@ function paintSidebar() {
 
   sidebar.append(h('div.spacer'));
 
+  // Account: the always-visible route back into Microsoft sign-in. Without it,
+  // dismissing the startup gateway once made signing in impossible.
+  const signedIn = settings.get('account.signedIn', false);
+  const tag = settings.get('account.gamertag', '') || '';
+  sidebar.appendChild(signedIn
+    ? h('button.nav-item.account-chip.ok', {
+        type: 'button',
+        onclick: () => navigate('settings', 'account'),
+        title: 'Xbox account — open account settings',
+      }, [icon('xbox', { size: 19 }), h('div.acct-text', [h('div.acct-name', tag || 'Xbox account'), h('div.acct-sub', 'Connected')])])
+    : h('button.nav-item.account-chip', {
+        type: 'button',
+        onclick: () => showSignInGate({ onDone: () => { refreshCatalog(); navigate('home'); } }),
+        title: 'Sign in with your Xbox / Microsoft account',
+      }, [icon('xbox', { size: 19 }), h('div.acct-text', [h('div.acct-name', 'Sign in'), h('div.acct-sub', 'Xbox / Microsoft account')])]));
+
   // Network status (no extra polling — navigator.onLine plus catalog outcome).
   const netChip = h(`div.status-chip${navigator.onLine ? '.ok' : '.err'}`, [
     h('span.dot'),
@@ -162,6 +180,28 @@ function wireTitlebar() {
   $('#tb-max').addEventListener('click', () => window.nexus.window.maximizeToggle());
   $('#tb-close').addEventListener('click', () => window.nexus.window.close());
 
+  // Master sound switch, always one click away (XFly-style quick mute): the
+  // game stream keeps its own audio, this silences the launcher's UI cues.
+  const soundBtn = $('#tb-sound');
+  const paintSound = () => {
+    const on = settings.get('audio.uiSounds', true) !== false && Number(settings.get('audio.uiVolume', 0.6)) > 0;
+    soundBtn.classList.toggle('off', !on);
+    soundBtn.title = on ? 'Sound on' : 'Sound off';
+    soundBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    for (const w of soundBtn.querySelectorAll('.tb-sound-wave')) w.style.display = on ? '' : 'none';
+    for (const w of soundBtn.querySelectorAll('.tb-sound-mute')) w.style.display = on ? 'none' : '';
+  };
+  soundBtn.addEventListener('click', async () => {
+    const on = settings.get('audio.uiSounds', true) !== false;
+    await settings.set('audio.uiSounds', !on);
+    paintSound();
+    if (!on) sfx('click');
+    else toastInfo('Sound off');
+  });
+  paintSound();
+  // settings.on() receives (changedPath, data) for every write.
+  settings.on((path) => { if (String(path).startsWith('audio.')) paintSound(); });
+
   window.nexus.events.windowState(({ maximized, fullscreen }) => {
     const btn = $('#tb-max');
     if (btn) btn.title = maximized ? 'Restore' : 'Maximize';
@@ -190,7 +230,11 @@ function wireEvents() {
     if (!payload) return;
     if (payload.state === 'loaded') { markStreamOpen(payload.productId); toastInfo(t('launched'), payload.title || ''); }
     else if (payload.state === 'closed') { markStreamClosed(payload.productId); }
-    else if (payload.state === 'crashed') {
+    else if (payload.state === 'error') {
+      // The window opened but the page did not: never leave it looking launched.
+      toastErr(new Error(payload.reason || 'page failed'), t('stream_crashed'));
+      toastInfo('Xbox’s play page did not load. Check your connection and press Play again.');
+    } else if (payload.state === 'crashed') {
       markStreamClosed(payload.productId);
       toastErr(new Error(payload.reason || 'renderer gone'), t('stream_crashed'));
       toastInfo(t('stream_crashed_msg'));
@@ -203,6 +247,8 @@ function wireEvents() {
     if (pad) pad.classList.toggle('active', !!connected);
     paintChrome();
   });
+
+  window.nexus.events.authChanged?.(() => paintSidebar());
 
   on('controller', ({ connected, id }) => {
     const pad = $('#tb-pad');
@@ -251,11 +297,35 @@ async function boot() {
   refreshCatalog();
 
   if (!settings.get('app.wizardCompleted', false)) {
-    runWizard(() => {
-      navigate('home');
-      refreshCatalog();
-    });
+    runWizard(() => afterIntro());
+  } else {
+    afterIntro();
   }
 }
+
+/**
+ * Post-intro sequence: connect the Xbox account first, then show the library.
+ * The gateway is skipped for anyone who has signed in before or chosen to
+ * browse without an account, so it never nags.
+ */
+function afterIntro() {
+  // Honour a deep link (#controls from the in-game panel, a restored route):
+  // afterIntro used to force the home screen, which threw the user out of
+  // whatever screen they had just been sent to.
+  if (!ROUTES[current]) navigate('home');
+  else paint();
+  refreshCatalog();
+  const signedIn = settings.get('account.signedIn', false);
+  const skipped = settings.get('account.skippedSignIn', false);
+  if (!signedIn && !skipped) {
+    showSignInGate({ onDone: () => { refreshCatalog(); } });
+  }
+}
+
+// The stream window's in-game panel can send the player here to remap controls.
+window.nexus.events.openControls?.((payload) => {
+  if (!payload?.productId) return;
+  import('./views/controls.js').then((m) => m.configureControlsForGame(payload.productId, { navigate }));
+});
 
 boot();

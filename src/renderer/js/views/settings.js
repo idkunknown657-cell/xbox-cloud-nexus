@@ -17,6 +17,7 @@ import { switchControl, sliderControl, setControlsTab, profiles } from './contro
 import { onStreamControllerChange } from '../gamepad.js';
 import { unlockAudio, sfx } from '../sfx.js';
 import * as cat from '../catalog.js';
+import { planLabel } from '../entitlements.js';
 
 const CATEGORIES = [
   { id: 'account', label: () => t('set_account'), iconName: 'shield' },
@@ -85,28 +86,169 @@ function select(options, current, onPick, ariaLabel) {
 }
 
 // ---------- Categories ----------
+/** Timer for the account card's live status — one at a time, no matter how
+ *  often the settings body repaints. */
+let acctTimer = null;
+
+/**
+ * Account card — the permanent home of Microsoft sign-in.
+ *
+ * The startup gateway can always be skipped, so this panel is what makes the
+ * sign-in reachable again later: same official page, same session, plus a live
+ * read of what the sign-in window is doing right now.
+ */
 function accountPanel(ctx) {
-  const rows = [];
-  rows.push(row(
-    'Microsoft / Xbox account',
-    t('signout_note'),
-    h('button.btn.sm', { onclick: () => openSignIn(ctx) }, icon('external', { size: 14 }), t('open_xbox'))
-  ));
-  rows.push(row('Session & privacy', 'Sign-in happens only on official Microsoft pages. This app never sees or stores your password, and no tokens are written to disk or logs.',
-    h('span.status-chip.ok', [h('span.dot'), 'Protected'])));
-  rows.push(row('Open the Xbox web app', 'Manage your account, subscription and profile on Microsoft’s own site.',
-    h('button.btn.sm', { onclick: () => window.nexus.openExternal('https://account.xbox.com') }, icon('external', { size: 14 }), 'account.xbox.com')));
-  return panel(t('set_account'), null, rows);
+  const statusChip = h('span.status-chip', [h('span.dot'), 'Checking…']);
+  const detail = h('div.r-desc', 'Checking the Xbox session on this PC…');
+  const signBtn = h('button.btn.sm.primary', { type: 'button' }, icon('xbox', { size: 15 }), 'Sign in with Microsoft');
+  const browserBtn = h('button.btn.sm', { type: 'button' }, icon('external', { size: 14 }), 'Open sign-in page in my browser');
+  const outBtn = h('button.btn.sm.danger', { type: 'button' }, icon('logout', { size: 14 }), 'Sign out');
+  const s_plan = () => settings.get('account.plan', 'auto') || 'auto';
+  const planDd = select([
+    { value: 'auto', label: 'Detect from Microsoft' },
+    { value: 'ultimate', label: 'Game Pass Ultimate' },
+    { value: 'pc', label: 'Game Pass PC' },
+    { value: 'console', label: 'Game Pass Console' },
+    { value: 'core', label: 'Game Pass Core' },
+    { value: 'standard', label: 'Game Pass Standard' },
+    { value: 'none', label: 'No subscription' },
+  ], s_plan(), (v) => {
+    window.nexus.auth.setPlan(v).then(() => {
+      toastOk('Subscription updated', v === 'auto' ? 'Detected from Microsoft' : v);
+      refresh();
+    }).catch((err) => toastErr(err, 'Could not update the subscription'));
+  }, 'My subscription');
+  let busy = false;
+
+  const paint = (s, state) => {
+    const signed = !!s?.signedIn;
+    statusChip.className = `status-chip${signed ? '.ok' : ''}`;
+    statusChip.innerHTML = '';
+    statusChip.append(h('span.dot'), document.createTextNode(signed ? 'Connected' : 'Not connected'));
+    // Reflect the account's tier wherever the player changed it.
+    if (planDd.value !== (s?.plan || 'auto')) planDd.value = s?.plan || 'auto';
+    const planChip = document.querySelector('.acct-plan-chip');
+    if (planChip) {
+      const src = s?.planSource || '';
+      planChip.textContent = signed
+        ? `${planLabel(s?.plan || 'none')}${src === 'manual' ? ' (set by you)' : (src === 'detected' ? ' (from Microsoft)' : ' (tell us below)')}`
+        : 'Sign in to see what your plan includes';
+    }
+    detail.textContent = signed
+      ? (s.gamertag ? `Signed in as ${s.gamertag}. Your library, cloud saves and Game Pass entitlements come from this account.`
+        : 'Signed in on this PC.')
+      : 'Not signed in. Sign-in happens on Microsoft’s own page — this app never sees your password.';
+    outBtn.style.display = signed ? '' : 'none';
+    if (state?.open) {
+      statusChip.className = 'status-chip.ok';
+      detail.textContent = state.loading
+        ? 'Microsoft’s sign-in page is loading…'
+        : 'Sign-in window is open — finish signing in there and this screen updates itself.';
+    }
+    if (state?.error) detail.textContent = state.error;
+  };
+
+  const refresh = async () => {
+    try {
+      const [s, state] = await Promise.all([
+        window.nexus.auth.status().catch(() => null),
+        window.nexus.auth.windowState().catch(() => null),
+      ]);
+      if (s) paint(s, state);
+      return s;
+    } catch { return null; }
+  };
+
+  const start = () => {
+    if (acctTimer) clearInterval(acctTimer);
+    acctTimer = setInterval(refresh, 2500);
+  };
+  const stop = () => { if (acctTimer) { clearInterval(acctTimer); acctTimer = null; } };
+  stop(); // a repaint rebuilt this card; the old one's timer is not welcome
+
+  signBtn.addEventListener('click', async () => {
+    if (busy) return;
+    busy = true;
+    signBtn.classList.add('busy');
+    try {
+      const res = await window.nexus.auth.signIn();
+      if (res?.reused) toastInfo('Sign-in window is already open');
+      detail.textContent = 'Waiting for Microsoft… sign in in the window that just opened.';
+      start();
+    } catch (err) {
+      toastErr(err, 'Could not open the sign-in window');
+      detail.textContent = 'The sign-in window did not open. Use the browser button instead.';
+    } finally {
+      busy = false;
+      signBtn.classList.remove('busy');
+    }
+  });
+
+  browserBtn.addEventListener('click', async () => {
+    if (busy) return;
+    busy = true;
+    try {
+      await window.nexus.auth.openInBrowser();
+      detail.textContent = 'Xbox is open in your browser. That login stays in the browser — press “Sign in with Microsoft” here as well so Nexus (and your games) share one session.';
+      toastInfo('Xbox opened in your browser');
+      signBtn.classList.add('highlight');
+      start();
+    } catch (err) {
+      toastErr(err, 'Could not open your browser');
+      const url = await window.nexus.auth.signInUrl?.().catch(() => '') || '';
+      detail.textContent = url ? `Open this page manually: ${url}` : 'Could not open your browser.';
+    } finally {
+      busy = false;
+    }
+  });
+
+  outBtn.addEventListener('click', async () => {
+    const ok = await confirmDialog({
+      title: 'Sign out of Xbox?',
+      message: 'This clears the Xbox session stored by this app on this PC. Your Microsoft account is untouched.',
+      confirmLabel: 'Sign out',
+      danger: true,
+    });
+    if (!ok) return;
+    try {
+      await window.nexus.auth.signOut();
+      toastOk('Signed out');
+      ctx?.repaint?.();
+    } catch (err) { toastErr(err, 'Could not sign out'); }
+    refresh();
+  });
+
+  const rows = [
+    row('Microsoft / Xbox account', null, h('div.acct-actions', [signBtn, outBtn]), 'microsoft account connect'),
+    h('div.acct-status', [statusChip, detail]),
+    // What the account may launch. The plan is read off Microsoft's own signed-in
+    // page; if that cannot be read, the player states it once here and every
+    // Play badge in the app follows it.
+    row('My subscription', 'Decides what each game shows: Play, Play with Ads, or Requires Game Pass. Detected from Microsoft’s page after you sign in — set it yourself if you would rather.',
+      h('div.acct-plan', [h('span.acct-plan-chip'), planDd])),
+    row('Open Xbox in your browser', 'Useful to check your account or finish a sign-in Microsoft only allows in a real browser. A browser login lives in the browser, so Nexus still needs its own one-time sign-in below to unlock your library.', browserBtn),
+    row('Session & privacy', 'Sign-in happens only on official Microsoft pages. This app never sees or stores your password, and no tokens are written to disk or logs.',
+      h('span.status-chip.ok', [h('span.dot'), 'Protected'])),
+    row('Open the Xbox web app', 'Manage your account, subscription and profile on Microsoft’s own site.',
+      h('button.btn.sm', { onclick: () => window.nexus.openExternal('https://account.xbox.com') }, icon('external', { size: 14 }), 'account.xbox.com')),
+  ];
+
+  const node = panel(t('set_account'), null, rows);
+  refresh();
+  start();
+  // The panel is re-created on every repaint of settings, so teardown matters.
+  ctx?.onLeave?.(stop);
+  return node;
 }
 
 async function openSignIn(ctx) {
-  // Sign-in always happens on Microsoft's own site inside the stream window,
-  // never in a fake in-app login form.
+  // Sign-in always happens on Microsoft's own site, never in a fake in-app
+  // login form: the sign-in window and the browser fallback share one session.
   try {
-    await window.nexus.launch({ productId: 'SIGNIN', title: 'Xbox Cloud Gaming' });
+    await window.nexus.auth.signIn();
     toastInfo(t('open_xbox'));
   } catch {
-    await window.nexus.openExternal('https://account.xbox.com');
+    await window.nexus.auth.openInBrowser();
   }
 }
 
@@ -472,8 +614,19 @@ function gotoCategory(ctx, id) {
 }
 
 // ---------- View ----------
+/**
+ * The open category lives at module scope on purpose: the settings body
+ * repaints whenever a control changes (ctx.repaint), and a fresh view must come
+ * back on the same category instead of dropping the user on Appearance. This is
+ * also what makes navigate('settings', 'account') work from the sidebar.
+ */
+let currentCategory = 'appearance';
+export function setStartCategory(id) {
+  if (CATEGORIES.some((c) => c.id === id)) currentCategory = id;
+}
+
 export function createView(ctx) {
-  let category = 'appearance';
+  let category = currentCategory;
   return {
     id: 'settings',
     render(root) {
@@ -500,7 +653,7 @@ export function createView(ctx) {
           return;
         }
         for (const m of matches) {
-          results.appendChild(h('button.p-item', { onclick: () => { category = m.cat; results.classList.add('hidden'); search.value = ''; gotoCategory(ctx, m.cat); } }, [
+          results.appendChild(h('button.p-item', { onclick: () => { category = m.cat; currentCategory = m.cat; results.classList.add('hidden'); search.value = ''; gotoCategory(ctx, m.cat); } }, [
             h('span.pi-icon', icon(m.iconName, { size: 16 })),
             h('span', [h('div.pi-name', m.label), h('div.pi-sub', t('settings_results'))]),
           ]));
@@ -515,7 +668,7 @@ export function createView(ctx) {
             h('nav.settings-nav', { 'aria-label': 'Settings categories' }, [
               ...CATEGORIES.map((c) => h(`button.nav-item${category === c.id ? '.active' : ''}`, {
                 dataset: { cat: c.id },
-                onclick: () => { category = c.id; paint(); },
+                onclick: () => { category = c.id; currentCategory = c.id; paint(); },
               }, [icon(c.iconName, { size: 18 }), c.label()])),
             ]),
           ]),
