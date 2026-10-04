@@ -17,34 +17,70 @@ import { accessFor as decide, accountFromSettings } from './entitlements.js';
 //
 // Covers are the single biggest cost on the home and library screens: the store
 // serves 2–4 MB originals, and asking for hundreds of them is what makes
-// thumbnails feel slow. Microsoft's image host accepts resize/format hints, so
-// every cover is requested once, at roughly the size it is painted at, and only
-// when it scrolls into view.
+// thumbnails feel slow. Microsoft's image host accepts resize/crop/format
+// hints, so every cover is requested once, at the box it is painted at, and
+// only when it scrolls into view.
 const ART_WIDTH = { tiny: 180, card: 300, wide: 640, hero: 1280 };
+/** Height / width of each painted box. Must match the CSS or the crop is wrong. */
+const ART_ASPECT = { portrait: 4 / 3, poster: 3 / 2, wide: 9 / 16 };
 const artCache = new Map();
 
 /**
+ * Can this host resize on demand?
+ *
+ * `store-images.s-microsoft.com` and `images-eds-ssl.xboxlive.com` can. The test
+ * has to allow the `-`/`.` before the domain, because Microsoft's image hosts
+ * are named `store-images.s-microsoft.com` — a `(^|\.)microsoft\.com$` test
+ * cannot see that, so this function silently returned the URL untouched and
+ * every card downloaded the full 3840×2160 original. Hundreds of multi-megabyte
+ * images is exactly what "the images load late" looks like from the other side
+ * of the screen.
+ */
+const RESIZABLE_SUFFIXES = ['microsoft.com', 'xboxlive.com'];
+const resizableHost = (host) => {
+  const h = String(host || '').toLowerCase();
+  return RESIZABLE_SUFFIXES.some((s) => h.endsWith('.' + s) || h.endsWith('-' + s) || h === s);
+};
+
+/**
  * Rewrite a store image URL to the size we actually paint.
+ *
+ * @param {string} url
+ * @param {number} width painted width in CSS pixels
+ * @param {{format?:string, aspect?:number, crop?:boolean}} [opts]
+ *   format  `jpg` (default) or `png` for logos that need their alpha
+ *   aspect  height = width * aspect. The CDN only crops when it is given both
+ *           sides: asking for `w` alone returns whatever aspect the original
+ *           has (a 300-wide request answered with 300×169 of a 16:9 master).
+ *   crop    false asks for width only, for art that must not lose its edges
+ *
+ * `format=webp` and `mode=pad` are rejected by this host — the request fails
+ * and the card falls back to initials. jpg and png are the accepted formats.
+ *
  * Unknown hosts are returned untouched so a change on Microsoft's side can
  * never break the covers entirely.
  */
-export function sizedArt(url, width, format = 'jpg') {
+export function sizedArt(url, width, opts = {}) {
   if (!url) return null;
-  const key = `${url}|${width}|${format}`;
+  const format = opts.format || 'jpg';
+  const aspect = opts.aspect || ART_ASPECT.portrait;
+  const crop = opts.crop !== false;
+  const key = `${url}|${width}|${format}|${aspect}|${crop}`;
   const hit = artCache.get(key);
   if (hit !== undefined) return hit;
   let out = url;
   try {
     const u = new URL(url);
-    if (/(^|\.)xboxlive\.com$/.test(u.hostname) || /(^|\.)microsoft\.com$/.test(u.hostname)) {
-      if (width) u.searchParams.set('w', String(width));
-      if (/images-eds/i.test(u.hostname)) {
-        u.searchParams.set('format', format);
-        u.searchParams.set('q', '78');
-        u.searchParams.set('h', String(Math.round(width * 1.5)));
-      } else {
-        u.searchParams.set('q', '78');
+    if (resizableHost(u.hostname)) {
+      if (width) {
+        u.searchParams.set('w', String(width));
+        if (crop) {
+          u.searchParams.set('h', String(Math.round(width * aspect)));
+          u.searchParams.set('mode', 'crop');
+        }
       }
+      u.searchParams.set('q', '78');
+      if (format) u.searchParams.set('format', format);
     }
     out = u.toString();
   } catch { /* keep the original URL */ }
@@ -52,25 +88,82 @@ export function sizedArt(url, width, format = 'jpg') {
   return out;
 }
 
-// ---------- Shared lazy image observer ----------
+// ---------- Shared lazy image loading ----------
+//
+// Covers load when they come near the screen, never all at once: a library of
+// two hundred cards is two hundred requests, and the point of the size hints
+// above is that the player pays for the ones they can actually see.
 let imgObserver = null;
+const pendingArt = new Set();
+let sweepQueued = false;
+
+/** Fetch one cover now, and stop watching it. */
+function loadArt(img) {
+  const src = img.dataset.src;
+  if (!src) return;
+  pendingArt.delete(img);
+  if (imgObserver) imgObserver.unobserve(img);
+  // The hint must be cleared before src is set, otherwise the browser keeps
+  // painting the placeholder while the real cover downloads.
+  img.removeAttribute('data-src');
+  img.addEventListener('load', () => { img.classList.add('loaded'); img.classList.remove('art-pending'); }, { once: true });
+  // A rejected size or format hint must never cost us the cover: try the
+  // untouched store URL once before giving up on the artwork.
+  const raw = img.dataset.raw || src;
+  img.addEventListener('error', () => {
+    if (img.dataset.triedRaw === '1' || raw === src) {
+      img.classList.add('art-fallback');
+      img.removeAttribute('src');
+      return;
+    }
+    img.dataset.triedRaw = '1';
+    img.src = raw;
+  });
+  img.src = src;
+}
+
+/** Is this element within `margin` px of the visible area? */
+function nearViewport(el, margin = 700) {
+  const r = el.getBoundingClientRect();
+  return r.bottom > -margin && r.top < (window.innerHeight || 0) + margin;
+}
+
+/**
+ * Load whatever is close to the screen right now.
+ *
+ * The IntersectionObserver is the normal path, and the cheap one. It is not the
+ * only one: a page that is never composited — a window that is still hidden
+ * behind `ready-to-show`, a minimized window, an automated capture run — gets no
+ * observer callbacks at all, so every cover would sit as a shimmer forever.
+ * That is precisely how the project's own README screenshots ended up as grids
+ * of empty grey cards. Geometry is available whether or not the page paints, so
+ * one rect-based sweep is the floor that guarantees a cover appears.
+ */
+function sweepArt() {
+  sweepQueued = false;
+  if (!pendingArt.size) return;
+  for (const img of Array.from(pendingArt)) {
+    if (nearViewport(img)) loadArt(img);
+  }
+}
+
+function queueSweep() {
+  if (sweepQueued) return;
+  sweepQueued = true;
+  // A timer rather than requestAnimationFrame: rAF does not run on a page that
+  // is not being composited, which is the exact case this exists for.
+  setTimeout(sweepArt, 0);
+}
+
 function observer() {
   if (imgObserver) return imgObserver;
   imgObserver = new IntersectionObserver((entries) => {
-    for (const e of entries) {
-      if (!e.isIntersecting) continue;
-      const img = e.target;
-      imgObserver.unobserve(img);
-      const src = img.dataset.src;
-      if (!src) continue;
-      // The hint must be cleared before src is set, otherwise the browser keeps
-      // painting the placeholder while the real cover downloads.
-      img.removeAttribute('data-src');
-      img.addEventListener('load', () => { img.classList.add('loaded'); img.classList.remove('art-pending'); }, { once: true });
-      img.addEventListener('error', () => { img.classList.add('art-fallback'); img.removeAttribute('src'); }, { once: true });
-      img.src = src;
-    }
+    for (const e of entries) if (e.isIntersecting) loadArt(e.target);
   }, { rootMargin: '600px 0px', threshold: 0.01 });
+  // Scrolls happen inside `.main`, not on the window, so listen in the capture
+  // phase where a scroll that does not bubble still reaches us.
+  window.addEventListener('scroll', queueSweep, { passive: true, capture: true });
+  window.addEventListener('resize', queueSweep, { passive: true });
   return imgObserver;
 }
 
@@ -79,19 +172,25 @@ function observer() {
  * Width/height are set before the source so the browser reserves the box and
  * the grid never reflows as covers arrive — that reflow is the "laggy" bit.
  */
-function lazyImg(src, alt, cls = 'art', width = ART_WIDTH.card) {
+function lazyImg(src, alt, cls = 'art', width = ART_WIDTH.card, aspect = ART_ASPECT.portrait) {
   const img = h(`img.${cls}`, {
     alt: alt || '',
     decoding: 'async',
     loading: 'lazy',
     draggable: false,
     width: String(width),
-    height: String(Math.round(width * 1.5)),
+    height: String(Math.round(width * aspect)),
   });
-  const full = src ? sizedArt(src, width) : null;
+  const full = src ? sizedArt(src, width, { aspect }) : null;
   if (full) {
     img.dataset.src = full;
+    if (full !== src) img.dataset.raw = src;
+    pendingArt.add(img);
     observer().observe(img);
+    queueSweep();
+    // A second pass after the view has settled: rows are appended in stages, and
+    // the one that lands after the sweep would otherwise wait for a scroll.
+    setTimeout(sweepArt, 900);
   } else {
     img.classList.add('art-fallback');
   }
@@ -471,13 +570,14 @@ export function portraitArt(p) { return p?.art?.portrait || p?.art?.tile || null
 
 /** Full-bleed background image element with a load fade. */
 export function bgImage(src, cls = 'hero-bg', width = ART_WIDTH.hero) {
-  const sized = src ? sizedArt(src, width) : null;
+  const sized = src ? sizedArt(src, width, { aspect: ART_ASPECT.wide }) : null;
   const el = h(`div.${cls}`, { style: sized ? { backgroundImage: `url("${sized}")` } : {} });
   if (sized) {
     // Reveal only once the bytes are here: a half-loaded backdrop looks worse
     // than the gradient that is already behind it.
     const probe = new Image();
     probe.onload = () => el.classList.add('loaded');
+    probe.onerror = () => { if (src !== sized) { probe.onerror = null; probe.src = src; } };
     probe.src = sized;
   }
   return el;

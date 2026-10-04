@@ -143,10 +143,10 @@ export function openDetails(game) {
       cat.bgImage(cat.heroArt(p), 'dh-bg'),
       h('div.dh-content', [
         poster
-          ? h('img.dh-poster', { src: cat.sizedArt(poster, 360), alt: p.title, loading: 'lazy', decoding: 'async', width: '360', height: '540' })
+          ? h('img.dh-poster', { src: cat.sizedArt(poster, 360, { aspect: 1.5 }), alt: p.title, loading: 'lazy', decoding: 'async', width: '360', height: '540' })
           : h('div.dh-poster.dh-poster-fallback', (p.title || '?').slice(0, 2).toUpperCase()),
         h('div.grow', [
-          logo ? h('img.dh-logo', { src: cat.sizedArt(logo, 520, 'png'), alt: '', loading: 'lazy', decoding: 'async' }) : null,
+          logo ? h('img.dh-logo', { src: cat.sizedArt(logo, 520, { format: 'png', crop: false }), alt: '', loading: 'lazy', decoding: 'async' }) : null,
           h('h1.dh-title', p.title),
           h('div.dh-meta', [
             p.publisher ? h('span', p.publisher) : null,

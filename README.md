@@ -23,8 +23,10 @@ full visual remapper on top.
 | --- | --- |
 | ![Home](docs/screenshots/home.png) | ![Library](docs/screenshots/library.png) |
 | **Home — featured title and Play with Ads rail** | **Library — the full cloud catalogue** |
-| ![Controls & Input](docs/screenshots/controls.png) | ![Controls at 1600x900](docs/screenshots/controls-900.png) |
-| **Controls & Input — mapping list, Xbox controller artwork, KBM panel, right rail** | **The same screen in a 1600x900 window** |
+| ![Game details](docs/screenshots/details.png) | ![Launch panel](docs/screenshots/launch.png) |
+| **Game details — box art, badges and what the account may do with the title** | **Before launch — control profile, input mode, mouse aiming, display options** |
+| ![Controls & Input](docs/screenshots/controls.png) | ![Controls in a 1280-wide window](docs/screenshots/controls-narrow.png) |
+| **Controls & Input — mapping list, Xbox controller artwork, KBM panel, right rail** | **The same screen in a 1280 wide window, where the panel used to overlap itself** |
 | ![Account](docs/screenshots/account.png) | |
 | **Settings → Account — sign-in, live status, subscription tier** | |
 
