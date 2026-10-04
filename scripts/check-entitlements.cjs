@@ -116,6 +116,34 @@ const ok = (name, cond, extra) => {
   const pascal = rules.accessFor({ ...gpGame, access: null }, { signedIn: false });
   ok('missing entitlement data degrades gracefully', !!pascal.state && pascal.play === true, JSON.stringify(pascal));
 
+  // ---------- Play-with-Ads is the answer for every tier ----------
+  //
+  // This is the launch panel from the bug report: Fortnite on Xbox's own ads
+  // list, with an Ultimate account, rendered "Free with ads" *and* "Play with
+  // Ads — Not in your plan (Game Pass Ultimate)" at the same time. A title on
+  // the ads list is streamed with a short ad whatever the account holds, so no
+  // tier may turn it into a plan problem.
+  const adsSubscribed = { ...gpGame, access: { ...gpGame.access, subscribed: true, requiresText: 'Requires Game Pass Ultimate' } };
+  const adTiers = ['ultimate', 'pc', 'console', 'core', 'standard', 'none'];
+  const adResults = adTiers.map((plan) => [plan, rules.accessFor(adsSubscribed, { ads: true, signedIn: true, plan, planKnown: true })]);
+  ok('an ads title is Play with Ads for every tier',
+    adResults.every(([, r]) => r.state === 'ads' && r.play === true),
+    adResults.filter(([, r]) => r.state !== 'ads').map(([p, r]) => `${p}:${r.state}`).join(','));
+  ok('an ads title never claims the plan is the problem',
+    adResults.every(([, r]) => !/not in your plan|does not include/i.test(r.reason)),
+    adResults.map(([, r]) => r.reason).find((x) => /not in your plan|does not include/i.test(x)) || '');
+  ok('an ads title explains the ad it is paid for with',
+    adResults.every(([, r]) => /ad\b/i.test(r.reason)), adResults[0][1].reason);
+  const adsNoAccount = rules.accessFor(adsSubscribed, { ads: true, signedIn: false });
+  ok('an ads title still offers Play when signed out',
+    adsNoAccount.state === 'ads' && adsNoAccount.play === true, JSON.stringify(adsNoAccount));
+  // The other half of the bug: a title that is NOT on the ads list must never
+  // borrow the ad wording to excuse a plan problem.
+  const noAds = rules.accessFor({ ...gpGame, access: { ...gpGame.access, subscribed: true, requiresText: 'Requires Game Pass Ultimate' } },
+    { ads: false, signedIn: true, plan: 'core', planKnown: true });
+  ok('a title without ads does not promise an ad it will not play',
+    noAds.state !== 'ads' && !/short ad|plays a short/i.test(noAds.reason), JSON.stringify(noAds));
+
   // ---------- Real payloads through the real rules ----------
   const real = parsed.map((p) => rules.accessFor({ id: p.id, title: p.title, access: p.access },
     { signedIn: true, plan: 'ultimate', planKnown: true }));

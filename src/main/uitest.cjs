@@ -848,7 +848,16 @@ ok('advanced renders', /in-game toggle hotkey/i.test(document.body.textContent))
         play.click(); await sleep(1000);
         const panelText = ($('.modal-veil') || {}).textContent || '';
         ok('ad-supported title warns about the pre-roll before launching',
-           /free with ads/i.test(panelText) && /ad/i.test(panelText), panelText.slice(0, 60));
+           /free to stream|free with ads/i.test(panelText) && /ad/i.test(panelText), panelText.slice(0, 60));
+        // The bug report's screenshot: the same panel said "Free with ads" and
+        // "Play with Ads - Not in your plan (Game Pass Ultimate)" about one game.
+        // A title on Xbox's ads list is streamed for every tier, so the plan can
+        // never be the reason, and the ad is stated once, not twice.
+        ok('ad-supported title is not also called a plan problem',
+           !/not in your plan|does not include/i.test(panelText), panelText.slice(0, 120));
+        ok('the pre-roll is explained exactly once',
+           (panelText.match(/short ad/gi) || []).length <= 1,
+           String((panelText.match(/short ad/gi) || []).length));
         const launch = $$('.modal-veil .btn').find((b) => /play now/i.test(b.textContent));
         ok('launch panel still offers Play now', !!launch);
         // Close without launching: no window should open during the test run.

@@ -155,14 +155,18 @@ export async function openLaunchPanel(game, ctx) {
         h('div.r-desc', 'Keyboard & mouse works on every cloud game, including controller-only titles.'),
       ]),
     ].filter(Boolean)),
-    // Free-with-ads titles are paid for by an Xbox-served pre-roll. Say so up
-    // front: the ad plays inside the game window and is not ours to skip.
-    adSupported ? h('div.lp-adrow', [icon('ads', { size: 15 }), h('span', 'Free with ads — Xbox plays a short ad in the game window before your session starts. It is what makes this title free, so let it finish.')]) : null,
+    // Free-with-ads titles are paid for by an Xbox-served pre-roll. Say so once:
+    // when the access line below already *is* the ad answer (state 'ads'), a
+    // second ad row read as a contradiction — the same game advertised as free
+    // with ads and, next to it, as not in the plan.
+    adSupported && access.state !== 'ads'
+      ? h('div.lp-adrow', [icon('ads', { size: 15 }), h('span', 'Free with ads — Xbox plays a short ad in the game window before your session starts. It is what makes this title free, so let it finish.')])
+      : null,
     // What this account may actually do with the title, in plain words.
     h(`div.lp-access${access.play === false ? '.blocked' : ''}`, [
       icon(access.play === false ? 'lock' : 'badge', { size: 15 }),
       h('div.grow', [
-        h('div.lp-access-title', access.play === false ? access.label : (access.state === 'ads' ? 'Play with Ads' : access.label)),
+        h('div.lp-access-title', access.label),
         h('div.r-desc', access.reason),
       ]),
     ]),

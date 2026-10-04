@@ -95,22 +95,30 @@ export function accessFor(game, account = {}) {
     };
   }
 
+  // The Play-with-Ads list is Microsoft's own answer for the title, and it is
+  // the answer for *every* account: a title on it is streamed with a short ad
+  // regardless of tier. Reading the plan first is what produced a launch panel
+  // that called the same game both "Free with ads" and "Not in your plan" —
+  // two statements that cannot both be true, so neither was believed.
+  if (ads) {
+    return {
+      state: 'ads', label: 'Play with Ads', tag: 'ADS', play: true,
+      reason: signedIn
+        ? 'Free to stream — Xbox plays a short ad in the game window before your session starts.'
+        : 'Free to stream with a short Xbox ad. Sign in with your Microsoft account to start it.',
+    };
+  }
+
   // A subscription title is one Microsoft says a Game Pass-style entitlement
   // satisfies; whether *this* account's tier covers it depends on the plan.
   const isSubscriptionTitle = acc.subscribed === true;
   const covered = isSubscriptionTitle && (!planKnown || planSatisfies(plansFromText(acc.requiresText), plan));
 
   if (!signedIn) {
-    if (acc.requiresPurchase === true && !ads) {
+    if (acc.requiresPurchase === true) {
       return {
         state: 'requiresSubscription', label: 'Requires subscription', tag: 'SUB', play: true,
         reason: 'This is not a free or ad-supported title. Sign in to see whether your plan includes it.',
-      };
-    }
-    if (ads) {
-      return {
-        state: 'ads', label: 'Play with Ads', tag: 'ADS', play: true,
-        reason: 'Free to stream with a short Xbox ad before the game. Sign in to confirm your account.',
       };
     }
     return {
@@ -135,14 +143,6 @@ export function accessFor(game, account = {}) {
       reason: 'Included with a Game Pass plan. Pick your tier in Settings → Account to see exact badges.',
     };
   }
-  if (ads) {
-    return {
-      state: 'ads', label: 'Play with Ads', tag: 'ADS', play: true,
-      reason: acc.subscribed === true
-        ? `Not in your plan (${plans.join(' / ') || 'a different tier'}), but Xbox streams it with a short ad.`
-        : 'Not in your plan, but Xbox streams it with a short ad before the game.',
-    };
-  }
   if (acc.free === true && acc.requiresPurchase !== true) {
     return {
       state: 'free', label: 'Play', tag: 'FREE', play: true,
@@ -157,6 +157,8 @@ export function accessFor(game, account = {}) {
         : 'Your plan does not include this title, and it is not offered with ads.',
     };
   }
+  // Nothing in Microsoft's payload named a plan and the title is not free: let
+  // Xbox answer at launch rather than inventing a requirement.
   return {
     state: 'unknown', label: 'Play', tag: null, play: true,
     reason: 'Xbox will confirm access when the game starts.',
