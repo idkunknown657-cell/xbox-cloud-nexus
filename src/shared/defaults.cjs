@@ -117,6 +117,7 @@ module.exports = {
     preferredLocale: 'en-US',
     fullscreenOnPlay: true,
     windowModePlay: 'fullscreen',
+    muted: false,                  // remembered across sessions, applied in-page
     maxFps: 60,                    // 60 = uncapped (Better xCloud range is 10..60)
     renderer: 'default',           // default | webgl2 (WebGL2 allows clarity boost)
     sharpen: 0,                    // 0..10 clarity boost

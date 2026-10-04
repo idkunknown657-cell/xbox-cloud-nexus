@@ -5,7 +5,7 @@
  * which asks the main process for its bundle via synchronous IPC.
  */
 const path = require('path');
-const { BrowserWindow, shell, session, ipcMain } = require('electron');
+const { app, BrowserWindow, shell, session, ipcMain } = require('electron');
 const { readAccount, AUTO_SIGNIN_SCRIPT, USER_INFO_KEY } = require('./xbox-account.cjs');
 const { productTitleToSlug, playUrl, launchUrl, launchScript } = require('./game-launch.cjs');
 
@@ -21,6 +21,7 @@ class WindowManager {
     this.mainWindow = null;
     this.signInWindow = null;
     this.streamWindows = new Map(); // productId -> BrowserWindow
+    this.streamVideo = new Map();   // productId -> last reported picture state
   }
 
   // ---------- Sign-in ----------
@@ -438,7 +439,13 @@ class WindowManager {
         contextIsolation: false,
         nodeIntegration: false,
         sandbox: false,
+        // Off on purpose: the stream keeps its own decode/network pipeline warm
+        // while the window is not in front, and a game that stalls when the
+        // player alt-tabs is worse than the GPU it saves.
         backgroundThrottling: false,
+        // Devtools are an authoring tool, not part of the product: in a packaged
+        // build they would hand the page a window we cannot style or hide.
+        devTools: !app.isPackaged,
       },
     });
 
@@ -607,6 +614,45 @@ class WindowManager {
   closeStream(productId) {
     const win = this.streamWindows.get(productId);
     if (win && !win.isDestroyed()) win.close();
+  }
+
+  /**
+   * Record what the game window's page reached, and tell the launcher.
+   *
+   * The page reports three distinguishable stages, because they fail for
+   * different reasons and a player needs to know which one they are in:
+   *
+   *   waiting  the page is up but no media element exists yet
+   *   splash   Xbox is playing its own intro clip (not the game yet)
+   *   playing  the stream has a real picture: `videoWidth` is set, so the
+   *            video track negotiated and frames are being decoded
+   *
+   * `videoWidth` is the honest signal here — XFly watches the same property for
+   * the same reason (MIT, credited in README). A `<video>` element that exists
+   * but never reports a width is a stream that never started, however healthy
+   * the page looks.
+   */
+  noteStreamVideo(productId, payload) {
+    if (!productId) return;
+    const state = String(payload.state || '');
+    const width = Number(payload.width) || 0;
+    const height = Number(payload.height) || 0;
+    const meta = this.streamVideo.get(productId) || {};
+    if (state === 'playing') {
+      if (meta.width === width && meta.height === height) return;  // no repeat noise
+      this.streamVideo.set(productId, { width, height, at: Date.now() });
+      this.log.info('stream', `picture up for ${productId}: ${width}x${height}`);
+    } else if (state === 'splash' || state === 'waiting') {
+      if (meta.state === state) return;
+      this.streamVideo.set(productId, { ...meta, state });
+      if (state === 'waiting') this.log.info('stream', `page up for ${productId}, no picture yet`);
+    }
+    this.sendToRenderer('stream:status', {
+      productId,
+      state: state === 'playing' ? 'playing' : state,
+      videoWidth: width,
+      videoHeight: height,
+    });
   }
 
   closeAllStreams() {

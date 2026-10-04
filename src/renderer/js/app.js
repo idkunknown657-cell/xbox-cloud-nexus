@@ -229,7 +229,18 @@ function wireEvents() {
   window.nexus.events.streamStatus((payload) => {
     if (!payload) return;
     if (payload.state === 'loaded') { markStreamOpen(payload.productId); toastInfo(t('launched'), payload.title || ''); }
-    else if (payload.state === 'closed') { markStreamClosed(payload.productId); }
+    else if (payload.state === 'playing') {
+      // The picture is up: this is the only point at which "it launched" becomes
+      // "it is actually running", and the numbers are worth showing.
+      markStreamOpen(payload.productId);
+      const size = payload.videoWidth && payload.videoHeight ? ` ${payload.videoWidth}×${payload.videoHeight}` : '';
+      toastOk('Stream is live' + size, 'Your game is running in its own window.');
+    } else if (payload.state === 'waiting') {
+      // The page is up but Xbox never sent video. Saying so is the difference
+      // between a spinner the player waits on forever and a problem they can act
+      // on.
+      toastWarn('Xbox has not sent any video yet', 'The play page loaded, but no picture arrived. If this continues, close the game window and press Play again.');
+    } else if (payload.state === 'closed') { markStreamClosed(payload.productId); }
     else if (payload.state === 'starting') {
       // The window opened the catalogue; the router is now taking us to the game.
       toastInfo('Starting…', payload.title || '');
@@ -244,7 +255,15 @@ function wireEvents() {
       if (payload.signedOut) {
         settings.set('account.signedIn', false).catch(() => {});
         paintSidebar();
-        toastInfo('Your Xbox session ended. Open Settings → Account and sign in again.');
+        toastInfo('Your Xbox session ended. Opening Microsoft sign-in…');
+        // The one refusal the player can fix is worth fixing for them: Xbox has
+        // no session, so put Microsoft's real sign-in page in front of them
+        // instead of a sentence telling them where to find it.
+        Promise.resolve(window.nexus.auth.signIn()).then(() => {
+          toastInfo('Sign in on Microsoft’s page, then press Play again.');
+        }).catch(() => {
+          toastInfo('Open Settings → Account to sign in again.');
+        });
       }
     } else if (payload.state === 'error') {
       // The window opened but the page did not: never leave it looking launched.

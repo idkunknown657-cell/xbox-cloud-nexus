@@ -154,6 +154,9 @@ function buildStreamBundle(settings, profile, appRoot, log) {
     bxGlobalPrefs: buildBxGlobalPrefs(settings),
     bxStreamPrefs: buildBxStreamPrefs(settings),
     toggleKey: (settings?.input?.kbmToggleKey) || 'F8',
+    // Applied by the preload as soon as the stream element exists, so a muted
+    // session stays muted across a restart instead of shouting at the player.
+    muted: settings?.cloud?.muted === true,
   };
 }
 

@@ -7,6 +7,7 @@
  *
  *   node scripts/cdp-drive.mjs targets
  *   CDP_MATCH="<regex>" node scripts/cdp-drive.mjs eval "<expression>"
+ *   node scripts/cdp-drive.mjs front          (bring the page forward)
  *   node scripts/cdp-drive.mjs shot docs/screenshots/out.png [width] [height]
  *   node scripts/cdp-drive.mjs resize <width> <height>
  */
@@ -92,6 +93,27 @@ if (cmd === 'targets') {
   const r = await session.send('Page.captureScreenshot', { format: 'png', fromSurface: false, captureBeyondViewport: false });
   writeFileSync(file, Buffer.from(r.data, 'base64'));
   console.log(`wrote ${file}`);
+} else if (cmd === 'window') {
+  // Report (and optionally restore) the OS window behind the page. A minimized
+  // or occluded window reports visibilityState 'hidden', which silently stops
+  // lazy images and makes every capture come back blank.
+  const { session } = await connect();
+  const { windowId } = await session.send('Browser.getWindowForTarget');
+  const first = await session.send('Browser.getWindowBounds', { windowId });
+  if (rest[0] === 'restore' && first.bounds.windowState !== 'normal') {
+    await session.send('Browser.setWindowBounds', { windowId, bounds: { windowState: 'normal' } });
+  }
+  const { bounds } = await session.send('Browser.getWindowBounds', { windowId });
+  console.log(JSON.stringify({ windowId, bounds, vis: await session.eval('document.visibilityState') }));
+} else if (cmd === 'front') {
+  // A window that is occluded (or behind an xbox.com sign-in window) reports
+  // document.visibilityState === 'hidden', and a hidden page runs no
+  // IntersectionObserver callbacks — so lazy-loaded covers never even start
+  // downloading. Bring the page forward before measuring anything visual.
+  const { session } = await connect();
+  await session.send('Page.bringToFront');
+  const vis = await session.eval('document.visibilityState');
+  console.log('visibility: ' + vis);
 } else if (cmd === 'resize') {
   // Resize the *renderer viewport*, which is what the layout actually responds
   // to. Browser.setWindowBounds cannot go below the OS minimum window size, so
@@ -102,6 +124,6 @@ if (cmd === 'targets') {
   });
   console.log(`viewport ${rest[0]}x${rest[1]}`);
 } else {
-  console.log('usage: targets | eval <expr> | shot <file> | resize <w> <h>');
+  console.log('usage: targets | eval <expr> | window [restore] | front | shot <file> | resize <w> <h>');
 }
 process.exit(0);

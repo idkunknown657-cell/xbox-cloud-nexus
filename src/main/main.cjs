@@ -2,7 +2,7 @@
  * Xbox Cloud Nexus — main process entry.
  * Owns app lifecycle, security policy, windows, catalog, settings and the IPC API.
  */
-const { app, ipcMain, dialog, shell, session, BrowserWindow, globalShortcut, protocol } = require('electron');
+const { app, ipcMain, dialog, shell, session, BrowserWindow, globalShortcut, protocol, Menu } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
@@ -344,6 +344,16 @@ ipcMain.handle('catalog:library', wrap(async () => {
     if (!payload || typeof payload !== 'object') return;
     if (payload.kind === 'controller') {
       winMgr.sendToRenderer('controllers:changed', { connected: !!payload.connected, id: payload.id || '' });
+      return;
+    }
+    // What the game window's page actually reached. "The page loaded" and "the
+    // stream is playing" are different facts, and conflating them is how a
+    // launcher ends up claiming success while the player stares at a spinner.
+    // The detection runs in the page (stream-preload.cjs, technique adapted
+    // from XFly, MIT) because only the page can see the media element.
+    if (payload.kind === 'video') {
+      const productId = winMgr.productIdForWebContents(wc);
+      winMgr.noteStreamVideo(productId, payload);
     }
   });
 
@@ -370,6 +380,13 @@ ipcMain.handle('catalog:library', wrap(async () => {
       frameCap: Number(cloud().frameCap) || 0,
       invertY: (store.get('input.mouse', {}) || {}).invertY === true,
       mouseSensitivity: Number((store.get('input.mouse', {}) || {}).sensitivity) || 1,
+      muted: cloud().muted === true,
+      // Profiles the player can switch to without leaving the game. The full
+      // remapper lives in the launcher; this is the short path for "this game
+      // needs different keys" mid-session.
+      profiles: (store.get('input.profiles', []) || []).map((p) => ({ id: p.id, name: p.name })),
+      activeProfile: store.get('input.activeProfile', 'default'),
+      assignedProfile: (store.get('input.gameProfiles', {}) || {})[productId] || '',
     });
     switch (payload.kind) {
       case 'state':
@@ -394,6 +411,21 @@ ipcMain.handle('catalog:library', wrap(async () => {
         if (payload.frameCap != null) store.set('cloud.frameCap', Math.max(0, Math.min(120, Number(payload.frameCap) || 0)));
         return { ...state(), needsRestart: true };
       }
+      case 'set-muted': {
+        store.set('cloud.muted', !!payload.value);
+        return state();
+      }
+      case 'set-profile': {
+        const id = String(payload.id || '');
+        const known = (store.get('input.profiles', []) || []).some((p) => p.id === id);
+        if (known) {
+          // Per-game assignment, same store the launcher's dropdown writes.
+          const assigned = { ...(store.get('input.gameProfiles', {}) || {}) };
+          assigned[productId] = id;
+          store.set('input.gameProfiles', assigned);
+        }
+        return state();
+      }
       case 'restart':
         winMgr.reloadStream(productId);
         return state();
@@ -410,6 +442,16 @@ ipcMain.handle('catalog:library', wrap(async () => {
         return state();
       case 'close':
         winMgr.closeStream(productId);
+        return { closed: true };
+      case 'quit':
+        // Leave the game the way a console does: close the session window and
+        // bring the library back to the front.
+        winMgr.closeStream(productId);
+        if (winMgr.mainWindow && !winMgr.mainWindow.isDestroyed()) {
+          if (winMgr.mainWindow.isMinimized()) winMgr.mainWindow.restore();
+          winMgr.mainWindow.show();
+          winMgr.mainWindow.focus();
+        }
         return { closed: true };
       default:
         return state();
@@ -575,6 +617,14 @@ function onAuthProgress() {
 // ---------- Lifecycle ----------
 app.whenReady().then(() => {
   log.info('app', `Xbox Cloud Nexus v${app.getVersion()} starting`, { hwAccel: store.get('performance.hwAccel') });
+  // There is no browser here. Electron installs a default application menu
+  // (File / Edit / View / Window / Help, with reload, zoom and devtools entries)
+  // on every window, and it is reachable with Alt even when the menu bar is
+  // auto-hidden. That menu *is* browser chrome, and the brief is that the player
+  // never sees any: the app is the Xbox Cloud Gaming experience and its own UI,
+  // nothing else. Removing it once, at the application level, is the only place
+  // that cannot be undone by a window option somewhere else.
+  Menu.setApplicationMenu(null);
   configureSessions();
   registerRendererProtocol();
   registerIpc();
@@ -648,6 +698,41 @@ async function runSmokeTest() {
     check('fallback profile when the game has no override',
       resolveProfileFor(store.data, 'OTHER-PRODUCT')?.id === store.data.input.activeProfile,
       resolveProfileFor(store.data, 'OTHER-PRODUCT')?.id);
+    // ---------- No browser chrome, by construction ----------
+    //
+    // The product is a launcher whose only visible chrome is its own: no address
+    // bar, no tabs, no toolbar, no extension UI, and no application menu. The
+    // menu is the one Electron adds by itself, so it is the one that has to be
+    // proven gone — an auto-hidden menu bar still drops down on Alt.
+    check('no application menu at all', Menu.getApplicationMenu() === null,
+      Menu.getApplicationMenu() ? 'still installed' : 'null');
+
+    // ---------- The stream tells the truth about what it reached ----------
+    //
+    // The launcher's honesty depends on these states, so they are asserted
+    // rather than assumed: a picture must report its resolution, a repeat must
+    // not spam the UI, and "no picture" must be reportable at all.
+    const seen = [];
+    const probeWm = new WindowManager({
+      store: store,
+      log: log,
+      sendToRenderer: (ch, payload) => { if (ch === 'stream:status') seen.push(payload); },
+      getStreamBundle: () => null,
+    });
+    probeWm.noteStreamVideo('SMOKEPROD', { state: 'playing', width: 1920, height: 1080 });
+    probeWm.noteStreamVideo('SMOKEPROD', { state: 'playing', width: 1920, height: 1080 });
+    probeWm.noteStreamVideo('SMOKEPROD', { state: 'playing', width: 1280, height: 720 });
+    check('a live picture reports its resolution once',
+      seen.length === 2 && seen[0].videoWidth === 1920 && seen[1].videoWidth === 1280,
+      `${seen.length} status update(s)`);
+    check('a resolution drop is reported, not hidden',
+      seen[1] && seen[1].state === 'playing' && seen[1].videoHeight === 720,
+      `second report ${seen[1] ? seen[1].videoWidth + 'x' + seen[1].videoHeight : 'missing'}`);
+    probeWm.noteStreamVideo('SMOKEPROD', { state: 'waiting' });
+    check('a page with no picture is reported as waiting',
+      seen[2] && seen[2].state === 'waiting' && seen[2].videoWidth === 0,
+      seen[2] ? seen[2].state : 'missing');
+
     // Give renderer a moment to boot, then quit
     setTimeout(async () => {
       check('main window', winMgr.mainWindow && !winMgr.mainWindow.isDestroyed());
